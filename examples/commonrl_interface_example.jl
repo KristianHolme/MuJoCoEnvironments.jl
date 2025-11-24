@@ -14,7 +14,7 @@ println("="^60)
 # Create a HalfCheetah environment with CommonRLInterface
 println("\nCreating HalfCheetah with CommonRLInterface...")
 core_env = HalfCheetahEnv(max_episode_steps = 200)
-env = CommonRLMuJoCoEnv(core_env)
+env = convert(CommonRLMuJoCoEnv, core_env)
 
 println("Environment type: ", typeof(env))
 println("Action space: ", CRL.actions(env))

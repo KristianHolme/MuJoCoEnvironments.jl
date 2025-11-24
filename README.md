@@ -11,7 +11,7 @@ MuJoCoEnvironments.jl provides a collection of reinforcement learning environmen
 - **Multiple Environments**: HalfCheetah, Hopper, Walker2d, Ant, Humanoid, Swimmer
 - **Flexible Interface**: Core internal interface with extensions for DRiL.jl and CommonRLInterface.jl
 - **MuJoCo.jl Integration**: Uses native Julia bindings for MuJoCo physics simulation
-- **No XML Files Required**: Automatically finds and uses MuJoCo's built-in models
+- **Built-in Models**: Includes MuJoCo XML model files from Gymnasium
 - **Visualization Support**: Native MuJoCo rendering through MuJoCo.jl
 
 ## Installation
@@ -130,5 +130,6 @@ See LICENSE file for details.
 ## Acknowledgments
 
 - [MuJoCo.jl](https://github.com/JamieMair/MuJoCo.jl) for Julia bindings to MuJoCo
+- [Gymnasium](https://github.com/Farama-Foundation/Gymnasium) for MuJoCo model files (Copyright (c) 2016 OpenAI, Copyright (c) 2022 Farama Foundation, MIT License)
 - [OpenAI Gym](https://github.com/openai/gym) for environment specifications
 - [DeepMind Control Suite](https://github.com/deepmind/dm_control) for reference implementations

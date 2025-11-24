@@ -11,7 +11,8 @@ println("="^60)
 
 # Create a HalfCheetah environment with DRiL interface
 println("\nCreating HalfCheetah with DRiL interface...")
-env = DRiLHalfCheetahEnv(max_episode_steps = 200)
+core_env = HalfCheetahEnv(max_episode_steps = 200)
+env = convert(DRiLMuJoCoEnv, core_env)
 
 println("Environment type: ", typeof(env))
 println("Observation space: ", DRiL.observation_space(env))
@@ -31,7 +32,7 @@ episode_length = 0
 
 for step in 1:100
     # Sample random action from action space
-    action = rand(env.rng, DRiL.action_space(env))
+    action = rand(env.core_env.rng, DRiL.action_space(env))
 
     # Take a step
     reward = DRiL.act!(env, action)

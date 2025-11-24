@@ -5,6 +5,7 @@ authors = ["Kristian Holme <holme.kristian@gmail.com> and contributors"]
 
 [deps]
 MuJoCo = "1c101251-5e0f-4746-b44c-0728d433b68a"
+PrettyTables = "08abe8d2-0d0c-5749-adfa-8a2ac140af0d"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [weakdeps]
@@ -19,15 +20,14 @@ MuJoCoEnvironmentsDRiLExt = "DRiL"
 CommonRLInterface = "0.3"
 DRiL = "0.0.1"
 MuJoCo = "0.2"
+PrettyTables = "3.1.2"
 julia = "1.10"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+TestItemRunner = "6e83d53b-900f-441f-8c04-7c77c3f60e07"
 
 [targets]
-test = ["Aqua", "JET", "Test"]
-
-[sources]
-DRiL = {url = "https://github.com/KristianHolme/DRiL.jl.git", rev = "dev"}
+test = ["Aqua", "JET", "Test", "TestItemRunner"]

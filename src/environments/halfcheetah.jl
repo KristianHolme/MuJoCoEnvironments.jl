@@ -3,13 +3,17 @@
 # ------------------------------------------------------------
 
 """
-    HalfCheetahEnv <: AbstractMuJoCoEnv
+    HalfCheetahEnv{T, R} <: AbstractMuJoCoEnv
 
 Half-Cheetah environment - a 2D robot that must learn to run forward.
 
 The HalfCheetah is a 2-legged robot that must learn to run forward as fast as
 possible. The robot has 6 actuated joints (3 per leg) and 9 degrees of freedom
 (including the x and z position and rotation of the torso).
+
+# Type Parameters
+- `T`: Floating point type for weights and parameters (default: `Float64`)
+- `R`: Concrete type of the random number generator (default: Julia's default RNG)
 
 # Observation Space
 - Position coordinates (qpos): 9 dimensions (excluding x-position)
@@ -23,48 +27,45 @@ Total: 17 dimensions
 - Forward velocity reward: rewards moving forward
 - Control cost: small penalty for using large control inputs
 """
-mutable struct HalfCheetahEnv <: AbstractMuJoCoEnv
+mutable struct HalfCheetahEnv{T, R} <: AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
     max_episode_steps::Int
-    rng::Random.AbstractRNG
+    frame_skip::Int
+    rng::R
 
     # Environment-specific parameters
-    forward_reward_weight::Float64
-    ctrl_cost_weight::Float64
-    reset_noise_scale::Float64
+    forward_reward_weight::T
+    ctrl_cost_weight::T
+    reset_noise_scale::T
 
     # For computing forward velocity
-    prev_x_pos::Float64
+    prev_x_pos::T
 
     function HalfCheetahEnv(;
             max_episode_steps::Int = 1000,
-            forward_reward_weight::Float64 = 1.0,
-            ctrl_cost_weight::Float64 = 0.1,
-            reset_noise_scale::Float64 = 0.1,
-            rng::Random.AbstractRNG = Random.Xoshiro(),
+            frame_skip::Int = 5,
+            forward_reward_weight = 1.0,
+            ctrl_cost_weight = 0.1,
+            reset_noise_scale = 0.1,
+            rng = Random.default_rng(),
             model_path::Union{String, Nothing} = nothing
         )
+        T = typeof(forward_reward_weight)
+        R = typeof(rng)
         # Load the model - either from provided path or use built-in
         if model_path !== nothing
             model, data = load_model_from_path(model_path)
         else
-            # Try to find the built-in half_cheetah model
-            try
-                path = get_model_path("half_cheetah")
-                model, data = load_model_from_path(path)
-            catch
-                # If that fails, use sample model as fallback
-                @warn "Could not find half_cheetah model, using sample model"
-                model, data = MuJoCo.sample_model_and_data()
-            end
+            path = get_model_path("half_cheetah")
+            model, data = load_model_from_path(path)
         end
 
-        env = new(
-            model, data, 0, max_episode_steps, rng,
+        env = new{T, R}(
+            model, data, 0, max_episode_steps, frame_skip, rng,
             forward_reward_weight, ctrl_cost_weight, reset_noise_scale,
-            0.0
+            zero(T)
         )
 
         return env
@@ -105,11 +106,12 @@ function step_env!(env::HalfCheetahEnv, action::AbstractVector)
 
     # Apply action and step simulation
     apply_action!(env, action)
-    forward_step!(env)
+    forward_step!(env, env.frame_skip)
 
     # Get new x position and compute forward velocity
     x_pos_after = env.data.qpos[1]
-    x_velocity = (x_pos_after - x_pos_before) / env.model.opt.timestep
+    dt = env.model.opt.timestep * env.frame_skip
+    x_velocity = (x_pos_after - x_pos_before) / dt
 
     # Compute reward
     forward_reward = env.forward_reward_weight * x_velocity
@@ -183,4 +185,8 @@ function get_observation_bounds(env::HalfCheetahEnv)
     high = fill(Inf, obs_size)
 
     return low, high
+end
+
+function is_terminated(env::HalfCheetahEnv)
+    return false  # HalfCheetah doesn't have termination conditions
 end

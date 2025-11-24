@@ -3,9 +3,13 @@
 # ------------------------------------------------------------
 
 """
-    Walker2dEnv <: AbstractMuJoCoEnv
+    Walker2dEnv{T, R} <: AbstractMuJoCoEnv
 
 Walker2d environment - a 2D two-legged robot that must learn to walk forward.
+
+# Type Parameters
+- `T`: Floating point type for weights and parameters (default: `Float64`)
+- `R`: Concrete type of the random number generator (default: Julia's default RNG)
 
 # Observation Space
 - Position coordinates (qpos): 9 dimensions (excluding x-position)
@@ -20,51 +24,48 @@ Total: 17 dimensions
 - Healthy reward: bonus for staying upright
 - Control cost: penalty for large actions
 """
-mutable struct Walker2dEnv <: AbstractMuJoCoEnv
+mutable struct Walker2dEnv{T, R} <: AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
     max_episode_steps::Int
-    rng::Random.AbstractRNG
+    rng::R
 
-    forward_reward_weight::Float64
-    ctrl_cost_weight::Float64
-    healthy_reward::Float64
-    reset_noise_scale::Float64
+    forward_reward_weight::T
+    ctrl_cost_weight::T
+    healthy_reward::T
+    reset_noise_scale::T
 
-    healthy_z_range::Tuple{Float64, Float64}
-    healthy_angle_range::Tuple{Float64, Float64}
+    healthy_z_range::Tuple{T, T}
+    healthy_angle_range::Tuple{T, T}
 
-    prev_x_pos::Float64
+    prev_x_pos::T
 
     function Walker2dEnv(;
             max_episode_steps::Int = 1000,
-            forward_reward_weight::Float64 = 1.0,
-            ctrl_cost_weight::Float64 = 1.0e-3,
-            healthy_reward::Float64 = 1.0,
-            reset_noise_scale::Float64 = 5.0e-3,
-            healthy_z_range::Tuple{Float64, Float64} = (0.8, 2.0),
-            healthy_angle_range::Tuple{Float64, Float64} = (-1.0, 1.0),
-            rng::Random.AbstractRNG = Random.Xoshiro(),
+            forward_reward_weight = 1.0,
+            ctrl_cost_weight = 1.0e-3,
+            healthy_reward = 1.0,
+            reset_noise_scale = 5.0e-3,
+            healthy_z_range = (0.8, 2.0),
+            healthy_angle_range = (-1.0, 1.0),
+            rng = Random.default_rng(),
             model_path::Union{String, Nothing} = nothing
         )
+        T = typeof(forward_reward_weight)
+        R = typeof(rng)
         if model_path !== nothing
             model, data = load_model_from_path(model_path)
         else
-            try
-                path = get_model_path("walker2d")
-                model, data = load_model_from_path(path)
-            catch
-                @warn "Could not find walker2d model, using sample model"
-                model, data = MuJoCo.sample_model_and_data()
-            end
+            path = get_model_path("walker2d")
+            model, data = load_model_from_path(path)
         end
 
-        return new(
+        return new{T, R}(
             model, data, 0, max_episode_steps, rng,
             forward_reward_weight, ctrl_cost_weight, healthy_reward, reset_noise_scale,
             healthy_z_range, healthy_angle_range,
-            0.0
+            zero(T)
         )
     end
 end
@@ -77,6 +78,10 @@ function is_healthy(env::Walker2dEnv)
     angle_healthy = env.healthy_angle_range[1] <= angle <= env.healthy_angle_range[2]
 
     return z_healthy && angle_healthy
+end
+
+function is_terminated(env::Walker2dEnv)
+    return !is_healthy(env)
 end
 
 function reset_env!(env::Walker2dEnv)

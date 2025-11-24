@@ -3,9 +3,13 @@
 # ------------------------------------------------------------
 
 """
-    HumanoidEnv <: AbstractMuJoCoEnv
+    HumanoidEnv{T, R} <: AbstractMuJoCoEnv
 
 Humanoid environment - a 3D bipedal robot that must learn to walk forward.
+
+# Type Parameters
+- `T`: Floating point type for weights and parameters (default: `Float64`)
+- `R`: Concrete type of the random number generator (default: Julia's default RNG)
 
 # Observation Space
 - Position coordinates (qpos): 24 dimensions (excluding x,y position)
@@ -22,49 +26,46 @@ Total: ~376 dimensions (varies with model specifics)
 - Healthy reward: bonus for staying upright
 - Control cost: penalty for large actions
 """
-mutable struct HumanoidEnv <: AbstractMuJoCoEnv
+mutable struct HumanoidEnv{T, R} <: AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
     max_episode_steps::Int
-    rng::Random.AbstractRNG
+    rng::R
 
-    forward_reward_weight::Float64
-    ctrl_cost_weight::Float64
-    healthy_reward::Float64
-    reset_noise_scale::Float64
+    forward_reward_weight::T
+    ctrl_cost_weight::T
+    healthy_reward::T
+    reset_noise_scale::T
 
-    healthy_z_range::Tuple{Float64, Float64}
+    healthy_z_range::Tuple{T, T}
 
-    prev_x_pos::Float64
+    prev_x_pos::T
 
     function HumanoidEnv(;
             max_episode_steps::Int = 1000,
-            forward_reward_weight::Float64 = 1.25,
-            ctrl_cost_weight::Float64 = 0.1,
-            healthy_reward::Float64 = 5.0,
-            reset_noise_scale::Float64 = 1.0e-2,
-            healthy_z_range::Tuple{Float64, Float64} = (1.0, 2.0),
-            rng::Random.AbstractRNG = Random.Xoshiro(),
+            forward_reward_weight = 1.25,
+            ctrl_cost_weight = 0.1,
+            healthy_reward = 5.0,
+            reset_noise_scale = 1.0e-2,
+            healthy_z_range = (1.0, 2.0),
+            rng = Random.default_rng(),
             model_path::Union{String, Nothing} = nothing
         )
+        T = typeof(forward_reward_weight)
+        R = typeof(rng)
         if model_path !== nothing
             model, data = load_model_from_path(model_path)
         else
-            try
-                path = get_model_path("humanoid")
-                model, data = load_model_from_path(path)
-            catch
-                @warn "Could not find humanoid model, using sample model"
-                model, data = MuJoCo.sample_model_and_data()
-            end
+            path = get_model_path("humanoid")
+            model, data = load_model_from_path(path)
         end
 
-        return new(
+        return new{T, R}(
             model, data, 0, max_episode_steps, rng,
             forward_reward_weight, ctrl_cost_weight, healthy_reward, reset_noise_scale,
             healthy_z_range,
-            0.0
+            zero(T)
         )
     end
 end
@@ -72,6 +73,10 @@ end
 function is_healthy(env::HumanoidEnv)
     z = env.data.qpos[3]  # z position
     return env.healthy_z_range[1] <= z <= env.healthy_z_range[2]
+end
+
+function is_terminated(env::HumanoidEnv)
+    return !is_healthy(env)
 end
 
 function reset_env!(env::HumanoidEnv)
