@@ -1,10 +1,25 @@
 name = "MuJoCoEnvironments"
 uuid = "21ab680e-8976-4604-9445-b09bf8035a21"
-authors = ["Kristian Holme <holme.kristian@gmail.com> and contributors"]
 version = "0.0.1-DEV"
+authors = ["Kristian Holme <holme.kristian@gmail.com> and contributors"]
+
+[deps]
+MuJoCo = "1c101251-5e0f-4746-b44c-0728d433b68a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[weakdeps]
+CommonRLInterface = "d842c3ba-07a1-494f-bbec-f50b8f2e4f04"
+DRiL = "49b37b9d-a8e6-4364-9144-4677bcb8a7f0"
+
+[extensions]
+MuJoCoEnvironmentsCommonRLInterfaceExt = "CommonRLInterface"
+MuJoCoEnvironmentsDRiLExt = "DRiL"
 
 [compat]
-julia = "1.11"
+CommonRLInterface = "0.3"
+DRiL = "0.0.1"
+MuJoCo = "0.2"
+julia = "1.10"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
@@ -13,3 +28,6 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Aqua", "JET", "Test"]
+
+[sources]
+DRiL = {url = "https://github.com/KristianHolme/DRiL.jl.git", rev = "dev"}
