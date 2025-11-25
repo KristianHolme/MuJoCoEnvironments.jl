@@ -1,5 +1,4 @@
 @testitem "reset_env!" begin
-    using MuJoCoEnvironments
 
     env = HalfCheetahEnv(max_episode_steps = 100)
     obs = reset_env!(env)
@@ -9,7 +8,6 @@
 end
 
 @testitem "step_env!" begin
-    using MuJoCoEnvironments
 
     env = HalfCheetahEnv(max_episode_steps = 100)
     reset_env!(env)
@@ -25,7 +23,6 @@ end
 end
 
 @testitem "is_terminated" begin
-    using MuJoCoEnvironments
 
     # Environments without termination
     env_hc = HalfCheetahEnv(max_episode_steps = 100)
@@ -44,7 +41,6 @@ end
 end
 
 @testitem "get_observation" begin
-    using MuJoCoEnvironments
 
     env = HopperEnv(max_episode_steps = 100)
     reset_env!(env)
@@ -54,7 +50,6 @@ end
 end
 
 @testitem "get_action_bounds" begin
-    using MuJoCoEnvironments
 
     env = Walker2dEnv(max_episode_steps = 100)
     low, high = get_action_bounds(env)
@@ -65,7 +60,6 @@ end
 end
 
 @testitem "get_observation_bounds" begin
-    using MuJoCoEnvironments
 
     env = AntEnv(max_episode_steps = 100)
     low, high = get_observation_bounds(env)
@@ -75,7 +69,6 @@ end
 end
 
 @testitem "is_truncated" begin
-    using MuJoCoEnvironments
 
     env = HalfCheetahEnv(max_episode_steps = 5)
     reset_env!(env)
@@ -89,7 +82,6 @@ end
 end
 
 @testitem "Random.seed!" begin
-    using MuJoCoEnvironments
     using Random
 
     env = HopperEnv(max_episode_steps = 100)

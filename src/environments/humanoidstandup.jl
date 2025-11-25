@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HumanoidStandupEnv{T, R} <: AbstractMuJoCoEnv
+    HumanoidStandupEnv{T, R} <: DRiL.AbstractEnv
 
 Humanoid Standup environment - 3D bipedal robot learning to stand up.
 
@@ -30,7 +30,7 @@ Total: 346 dimensions by default
 - Control cost: penalty for large actions
 - Impact cost: penalty for large contact forces
 """
-mutable struct HumanoidStandupEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct HumanoidStandupEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -146,8 +146,8 @@ function step_env!(env::HumanoidStandupEnv, action::AbstractVector)
 end
 
 function get_observation(env::HumanoidStandupEnv)
-    position = env.data.qpos[3:end]  # Exclude x, y
-    velocity = env.data.qvel
+    position = vec(env.data.qpos[3:end])  # Exclude x, y
+    velocity = vec(env.data.qvel)
 
     obs_parts = [position, velocity]
 
@@ -162,7 +162,7 @@ function get_observation(env::HumanoidStandupEnv)
     end
 
     if env.include_qfrc_actuator_in_observation
-        actuator_forces = env.data.qfrc_actuator[7:end]  # Exclude root (6 DOF)
+        actuator_forces = vec(env.data.qfrc_actuator[7:end])  # Exclude root (6 DOF)
         push!(obs_parts, actuator_forces)
     end
 
@@ -171,12 +171,57 @@ function get_observation(env::HumanoidStandupEnv)
         push!(obs_parts, external_contact_forces)
     end
 
-    return vcat(obs_parts...)
+    return vec(vcat(obs_parts...))
 end
 
 function get_action_bounds(env::HumanoidStandupEnv)
     n_actions = env.model.nu
     return fill(-0.4, n_actions), fill(0.4, n_actions)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::HumanoidStandupEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::HumanoidStandupEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.ctrl_cost_weight), reward)
+end
+
+function DRiL.observe(env::HumanoidStandupEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::HumanoidStandupEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::HumanoidStandupEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::HumanoidStandupEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.ctrl_cost_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::HumanoidStandupEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.ctrl_cost_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::HumanoidStandupEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end
 
 function get_observation_bounds(env::HumanoidStandupEnv)

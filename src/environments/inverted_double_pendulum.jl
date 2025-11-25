@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    InvertedDoublePendulumEnv{T, R} <: AbstractMuJoCoEnv
+    InvertedDoublePendulumEnv{T, R} <: DRiL.AbstractEnv
 
 Inverted Double Pendulum environment - 2 pole variation of CartPole.
 
@@ -29,7 +29,7 @@ Total: 9 dimensions
 - Distance penalty: penalty based on tip position
 - Velocity penalty: penalty for moving too fast
 """
-mutable struct InvertedDoublePendulumEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct InvertedDoublePendulumEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -113,20 +113,20 @@ end
 
 function get_observation(env::InvertedDoublePendulumEnv)
     # Cart position
-    cart_pos = env.data.qpos[1:1]
+    cart_pos = vec(env.data.qpos[1:1])
 
     # sin and cos of pole angles
-    pole_angles = env.data.qpos[2:3]
+    pole_angles = vec(env.data.qpos[2:3])
     sin_angles = sin.(pole_angles)
     cos_angles = cos.(pole_angles)
 
     # Velocities (clipped to [-10, 10])
-    qvel = clamp.(env.data.qvel, -10.0, 10.0)
+    qvel = vec(clamp.(env.data.qvel, -10.0, 10.0))
 
     # Constraint force (x component only, clipped)
-    qfrc_constraint = clamp.(env.data.qfrc_constraint[1:1], -10.0, 10.0)
+    qfrc_constraint = vec(clamp.(env.data.qfrc_constraint[1:1], -10.0, 10.0))
 
-    return vcat(cart_pos, sin_angles, cos_angles, qvel, qfrc_constraint)
+    return vec(vcat(cart_pos, sin_angles, cos_angles, qvel, qfrc_constraint))
 end
 
 function get_action_bounds(env::InvertedDoublePendulumEnv)
@@ -136,4 +136,49 @@ end
 function get_observation_bounds(env::InvertedDoublePendulumEnv)
     obs_size = 9
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::InvertedDoublePendulumEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::InvertedDoublePendulumEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.healthy_reward), reward)
+end
+
+function DRiL.observe(env::InvertedDoublePendulumEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::InvertedDoublePendulumEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::InvertedDoublePendulumEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::InvertedDoublePendulumEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.healthy_reward)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::InvertedDoublePendulumEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.healthy_reward)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::InvertedDoublePendulumEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

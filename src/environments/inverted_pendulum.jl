@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    InvertedPendulumEnv{T, R} <: AbstractMuJoCoEnv
+    InvertedPendulumEnv{T, R} <: DRiL.AbstractEnv
 
 Inverted Pendulum environment - MuJoCo version of CartPole.
 
@@ -24,7 +24,7 @@ Total: 4 dimensions
 # Reward
 - +1 for each timestep the pole is upright (angle < 0.2 radians)
 """
-mutable struct InvertedPendulumEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct InvertedPendulumEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -91,7 +91,7 @@ function step_env!(env::InvertedPendulumEnv, action::AbstractVector)
 end
 
 function get_observation(env::InvertedPendulumEnv)
-    return vcat(env.data.qpos, env.data.qvel)
+    return vcat(vec(env.data.qpos), vec(env.data.qvel))
 end
 
 function get_action_bounds(env::InvertedPendulumEnv)
@@ -101,4 +101,49 @@ end
 function get_observation_bounds(env::InvertedPendulumEnv)
     obs_size = env.model.nq + env.model.nv
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::InvertedPendulumEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::InvertedPendulumEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.reset_noise_scale), reward)
+end
+
+function DRiL.observe(env::InvertedPendulumEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::InvertedPendulumEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::InvertedPendulumEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::InvertedPendulumEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.reset_noise_scale)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::InvertedPendulumEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.reset_noise_scale)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::InvertedPendulumEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

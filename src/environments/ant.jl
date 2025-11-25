@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    AntEnv{T, R} <: AbstractMuJoCoEnv
+    AntEnv{T, R} <: DRiL.AbstractEnv
 
 Ant environment - a 4-legged robot that must learn to walk forward.
 
@@ -28,7 +28,7 @@ Total: 105 dimensions by default
 - Control cost: penalty for large actions
 - Contact cost: penalty for undesired contacts
 """
-mutable struct AntEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct AntEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -170,8 +170,8 @@ end
 
 function get_observation(env::AntEnv)
     # Exclude x,y position (indices 1,2)
-    qpos = env.data.qpos[3:end]
-    qvel = env.data.qvel
+    qpos = vec(env.data.qpos[3:end])
+    qvel = vec(env.data.qvel)
 
     obs = vcat(qpos, qvel)
 
@@ -197,4 +197,49 @@ function get_observation_bounds(env::AntEnv)
         obs_size += (env.model.nbody - 1) * 6
     end
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::AntEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::AntEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.forward_reward_weight), reward)
+end
+
+function DRiL.observe(env::AntEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::AntEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::AntEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::AntEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::AntEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::AntEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

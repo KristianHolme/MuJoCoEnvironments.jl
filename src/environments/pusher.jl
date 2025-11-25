@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    PusherEnv{T, R} <: AbstractMuJoCoEnv
+    PusherEnv{T, R} <: DRiL.AbstractEnv
 
 Pusher environment - a multi-jointed robot arm.
 
@@ -29,7 +29,7 @@ Total: 23 dimensions
 - Near reward: negative distance from fingertip to object
 - Control reward: negative squared action norm
 """
-mutable struct PusherEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct PusherEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -147,12 +147,14 @@ function get_observation(env::PusherEnv)
     object_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "object")).xpos
     goal_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "goal")).xpos
 
-    return vcat(
-        env.data.qpos[1:7],
-        env.data.qvel[1:7],
-        fingertip_pos,
-        object_pos,
-        goal_pos
+    return vec(
+        vcat(
+            vec(env.data.qpos[1:7]),
+            vec(env.data.qvel[1:7]),
+            vec(fingertip_pos),
+            vec(object_pos),
+            vec(goal_pos)
+        )
     )
 end
 
@@ -164,4 +166,49 @@ end
 function get_observation_bounds(env::PusherEnv)
     obs_size = 23
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::PusherEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::PusherEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.reward_near_weight), reward)
+end
+
+function DRiL.observe(env::PusherEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::PusherEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::PusherEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::PusherEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.reward_near_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::PusherEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.reward_near_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::PusherEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

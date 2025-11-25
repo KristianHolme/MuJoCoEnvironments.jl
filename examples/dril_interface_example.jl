@@ -12,7 +12,7 @@ println("="^60)
 # Create a HalfCheetah environment with DRiL interface
 println("\nCreating HalfCheetah with DRiL interface...")
 core_env = HalfCheetahEnv(max_episode_steps = 200)
-env = convert(DRiLMuJoCoEnv, core_env)
+env = convert(DRiL.AbstractEnv, core_env)
 
 println("Environment type: ", typeof(env))
 println("Observation space: ", DRiL.observation_space(env))
@@ -22,7 +22,7 @@ println("Action space: ", DRiL.action_space(env))
 println("\nResetting environment...")
 DRiL.reset!(env)
 obs = DRiL.observe(env)
-println("Initial observation size: ", length(obs))
+println("Initial observation size: ", size(obs))
 println("First 5 observation values: ", obs[1:min(5, length(obs))])
 
 # Run an episode
@@ -83,7 +83,7 @@ println("="^60)
 core_hopper = HopperEnv(max_episode_steps = 150)
 
 # Wrap it for DRiL
-dril_hopper = DRiLMuJoCoEnv(core_hopper)
+dril_hopper = convert(DRiL.AbstractEnv, core_hopper)
 
 println("Created wrapped Hopper environment")
 println("Observation space: ", DRiL.observation_space(dril_hopper))

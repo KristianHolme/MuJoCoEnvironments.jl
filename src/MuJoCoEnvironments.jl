@@ -2,10 +2,11 @@ module MuJoCoEnvironments
 
 using MuJoCo
 using Random
+using DRiL
 
 # Core interface
 include("core_interface.jl")
-export AbstractMuJoCoEnv
+# _AbstractMuJoCoEnv is internal, not exported
 
 # Base functionality
 include("mujoco_env_base.jl")

@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    Walker2dEnv{T, R} <: AbstractMuJoCoEnv
+    Walker2dEnv{T, R} <: DRiL.AbstractEnv
 
 Walker2d environment - a 2D two-legged robot that must learn to walk forward.
 
@@ -24,7 +24,7 @@ Total: 17 dimensions
 - Healthy reward: bonus for staying upright
 - Control cost: penalty for large actions
 """
-mutable struct Walker2dEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct Walker2dEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -129,8 +129,8 @@ function step_env!(env::Walker2dEnv, action::AbstractVector)
 end
 
 function get_observation(env::Walker2dEnv)
-    qpos = env.data.qpos[2:end]
-    qvel = env.data.qvel
+    qpos = vec(env.data.qpos[2:end])
+    qvel = vec(env.data.qvel)
     return vcat(qpos, qvel)
 end
 
@@ -142,4 +142,49 @@ end
 function get_observation_bounds(env::Walker2dEnv)
     obs_size = (env.model.nq - 1) + env.model.nv
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::Walker2dEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::Walker2dEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.forward_reward_weight), reward)
+end
+
+function DRiL.observe(env::Walker2dEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::Walker2dEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::Walker2dEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::Walker2dEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::Walker2dEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::Walker2dEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

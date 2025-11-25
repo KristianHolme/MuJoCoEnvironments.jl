@@ -1,26 +1,24 @@
 @testitem "Full episode" begin
-    using MuJoCoEnvironments
-
     env = HalfCheetahEnv(max_episode_steps = 10)
-    obs = reset_env!(env)
-    total_reward = 0.0
-    low, high = get_action_bounds(env)
+    reset_env!(env)
+    let tot_reward = 0.0
+        low, high = get_action_bounds(env)
 
-    for _ in 1:10
-        action = zeros(length(low))
-        obs, reward, terminated, truncated, info = step_env!(env, action)
-        total_reward += reward
-        if terminated || truncated
-            break
+        for _ in 1:10
+            action = zeros(length(low))
+            _, reward, terminated, truncated, info = step_env!(env, action)
+            tot_reward += reward
+            if terminated || truncated
+                break
+            end
         end
-    end
 
-    @test total_reward isa Real
-    @test is_truncated(env) || env.timestep >= 10
+        @test tot_reward isa Real
+        @test is_truncated(env) || env.timestep >= 10
+    end
 end
 
 @testitem "Reproducibility" begin
-    using MuJoCoEnvironments
     using Random
 
     rng1 = Random.Xoshiro(123)
@@ -36,8 +34,6 @@ end
 end
 
 @testitem "Multiple environments" begin
-    using MuJoCoEnvironments
-
     envs = [
         HalfCheetahEnv(max_episode_steps = 10),
         HopperEnv(max_episode_steps = 10),

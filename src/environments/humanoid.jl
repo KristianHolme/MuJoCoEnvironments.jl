@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HumanoidEnv{T, R} <: AbstractMuJoCoEnv
+    HumanoidEnv{T, R} <: DRiL.AbstractEnv
 
 Humanoid environment - a 3D bipedal robot that must learn to walk forward.
 
@@ -26,7 +26,7 @@ Total: ~376 dimensions (varies with model specifics)
 - Healthy reward: bonus for staying upright
 - Control cost: penalty for large actions
 """
-mutable struct HumanoidEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct HumanoidEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -125,8 +125,8 @@ end
 
 function get_observation(env::HumanoidEnv)
     # Exclude x,y position
-    qpos = env.data.qpos[3:end]
-    qvel = env.data.qvel
+    qpos = vec(env.data.qpos[3:end])
+    qvel = vec(env.data.qvel)
 
     # Basic observation: qpos (without x,y) and qvel
     return vcat(qpos, qvel)
@@ -141,4 +141,49 @@ end
 function get_observation_bounds(env::HumanoidEnv)
     obs_size = (env.model.nq - 2) + env.model.nv
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::HumanoidEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::HumanoidEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.forward_reward_weight), reward)
+end
+
+function DRiL.observe(env::HumanoidEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::HumanoidEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::HumanoidEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::HumanoidEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::HumanoidEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::HumanoidEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

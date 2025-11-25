@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    ReacherEnv{T, R} <: AbstractMuJoCoEnv
+    ReacherEnv{T, R} <: DRiL.AbstractEnv
 
 Reacher environment - a two-jointed robot arm.
 
@@ -28,7 +28,7 @@ Total: 10 dimensions
 - Distance reward: negative distance from fingertip to target
 - Control reward: negative squared action norm
 """
-mutable struct ReacherEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct ReacherEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -136,12 +136,14 @@ function get_observation(env::ReacherEnv)
     target_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "target")).xpos
     diff = fingertip_pos[1:2] - target_pos[1:2]
 
-    return vcat(
-        cos.(theta),
-        sin.(theta),
-        env.data.qpos[3:4],  # Target position
-        env.data.qvel[1:2],  # Arm velocities
-        diff  # fingertip - target (x, y)
+    return vec(
+        vcat(
+            cos.(vec(theta)),
+            sin.(vec(theta)),
+            vec(env.data.qpos[3:4]),  # Target position
+            vec(env.data.qvel[1:2]),  # Arm velocities
+            vec(diff)  # fingertip - target (x, y)
+        )
     )
 end
 
@@ -153,4 +155,49 @@ end
 function get_observation_bounds(env::ReacherEnv)
     obs_size = 10
     return fill(-Inf, obs_size), fill(Inf, obs_size)
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::ReacherEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::ReacherEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.reward_dist_weight), reward)
+end
+
+function DRiL.observe(env::ReacherEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::ReacherEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::ReacherEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::ReacherEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.reward_dist_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::ReacherEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.reward_dist_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::ReacherEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

@@ -2,21 +2,20 @@
 # Core Internal Interface
 # ------------------------------------------------------------
 """
-    AbstractMuJoCoEnv{T}
+    _AbstractMuJoCoEnv{T} <: DRiL.AbstractEnv
 
-Abstract base type for all MuJoCo environments.
+Internal abstract base type for MuJoCo environments.
 
 # Type Parameters
 - `T`: Floating point type used for weights, parameters, and observations (e.g., `Float32`, `Float64`)
 
-This minimal interface is intentionally separate from specific RL framework
-interfaces (like DRiL, CommonRLInterface, POMDPs, etc.) to maintain flexibility
-and avoid coupling.
+This is an internal interface used for shared functionality. All MuJoCo environments
+inherit from this type and thus implement DRiL.AbstractEnv.
 """
-abstract type AbstractMuJoCoEnv{T} end
+abstract type _AbstractMuJoCoEnv{T} <: DRiL.AbstractEnv end
 
 """
-    reset_env!(env::AbstractMuJoCoEnv{T}) -> observation
+    reset_env!(env::_AbstractMuJoCoEnv{T}) -> observation
 
 Reset the environment to its initial state and return the initial observation.
 
@@ -29,7 +28,7 @@ Reset the environment to its initial state and return the initial observation.
 function reset_env! end
 
 """
-    step_env!(env::AbstractMuJoCoEnv{T}, action) -> (observation, reward, terminated, truncated, info)
+    step_env!(env::_AbstractMuJoCoEnv{T}, action) -> (observation, reward, terminated, truncated, info)
 
 Take a step in the environment by applying the given action.
 
@@ -47,7 +46,7 @@ Take a step in the environment by applying the given action.
 function step_env! end
 
 """
-    get_observation(env::AbstractMuJoCoEnv{T}) -> observation
+    get_observation(env::_AbstractMuJoCoEnv{T}) -> observation
 
 Get the current observation from the environment.
 
@@ -60,7 +59,7 @@ Get the current observation from the environment.
 function get_observation end
 
 """
-    get_action_bounds(env::AbstractMuJoCoEnv{T}) -> (low, high)
+    get_action_bounds(env::_AbstractMuJoCoEnv{T}) -> (low, high)
 
 Get the lower and upper bounds for the action space.
 
@@ -74,7 +73,7 @@ Get the lower and upper bounds for the action space.
 function get_action_bounds end
 
 """
-    get_observation_bounds(env::AbstractMuJoCoEnv{T}) -> (low, high)
+    get_observation_bounds(env::_AbstractMuJoCoEnv{T}) -> (low, high)
 
 Get the lower and upper bounds for the observation space.
 
@@ -88,7 +87,7 @@ Get the lower and upper bounds for the observation space.
 function get_observation_bounds end
 
 """
-    is_terminated(env::AbstractMuJoCoEnv{T}) -> Bool
+    is_terminated(env::_AbstractMuJoCoEnv{T}) -> Bool
 
 Check if the environment episode has terminated (reached a terminal state).
 

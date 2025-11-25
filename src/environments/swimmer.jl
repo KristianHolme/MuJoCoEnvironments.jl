@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    SwimmerEnv{T, R} <: AbstractMuJoCoEnv
+    SwimmerEnv{T, R} <: DRiL.AbstractEnv
 
 Swimmer environment - a 3-link swimming robot that must learn to swim forward.
 
@@ -23,7 +23,7 @@ Total: 8 dimensions
 - Forward velocity reward
 - Control cost: penalty for large actions
 """
-mutable struct SwimmerEnv{T <: AbstractFloat, R <: Random.AbstractRNG} <: AbstractMuJoCoEnv{T}
+mutable struct SwimmerEnv{T <: AbstractFloat, R <: Random.AbstractRNG} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -105,8 +105,8 @@ end
 
 function get_observation(env::SwimmerEnv)
     # Exclude x,y position
-    qpos = env.data.qpos[3:end]
-    qvel = env.data.qvel
+    qpos = vec(env.data.qpos[3:end])
+    qvel = vec(env.data.qvel)
     return vcat(qpos, qvel)
 end
 
@@ -122,4 +122,49 @@ end
 
 function is_terminated(env::SwimmerEnv)
     return false  # Swimmer doesn't have termination conditions
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::SwimmerEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::SwimmerEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.forward_reward_weight), reward)
+end
+
+function DRiL.observe(env::SwimmerEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::SwimmerEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::SwimmerEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::SwimmerEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::SwimmerEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::SwimmerEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

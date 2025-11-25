@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HalfCheetahEnv{T, R} <: AbstractMuJoCoEnv
+    HalfCheetahEnv{T, R} <: DRiL.AbstractEnv
 
 Half-Cheetah environment - a 2D robot that must learn to run forward.
 
@@ -27,7 +27,7 @@ Total: 17 dimensions
 - Forward velocity reward: rewards moving forward
 - Control cost: small penalty for using large control inputs
 """
-mutable struct HalfCheetahEnv{T, R} <: AbstractMuJoCoEnv{T}
+mutable struct HalfCheetahEnv{T, R} <: _AbstractMuJoCoEnv{T}
     model::MuJoCo.Model
     data::MuJoCo.Data
     timestep::Int
@@ -153,8 +153,8 @@ The observation consists of:
 """
 function get_observation(env::HalfCheetahEnv)
     # qpos without x position (qpos[1])
-    qpos = env.data.qpos[2:end]
-    qvel = env.data.qvel
+    qpos = vec(env.data.qpos[2:end])
+    qvel = vec(env.data.qvel)
 
     return vcat(qpos, qvel)
 end
@@ -189,4 +189,49 @@ end
 
 function is_terminated(env::HalfCheetahEnv)
     return false  # HalfCheetah doesn't have termination conditions
+end
+
+# DRiL interface implementation
+function DRiL.reset!(env::HalfCheetahEnv)
+    reset_env!(env)
+    return nothing
+end
+
+function DRiL.act!(env::HalfCheetahEnv, action::AbstractVector)
+    obs, reward, terminated, truncated, info = step_env!(env, action)
+    if terminated || truncated
+        info["terminal_observation"] = obs
+    end
+    return convert(eltype(env.forward_reward_weight), reward)
+end
+
+function DRiL.observe(env::HalfCheetahEnv)
+    return get_observation(env)
+end
+
+function DRiL.terminated(env::HalfCheetahEnv)
+    return is_terminated(env)
+end
+
+function DRiL.truncated(env::HalfCheetahEnv)
+    return is_truncated(env)
+end
+
+function DRiL.observation_space(env::HalfCheetahEnv)
+    obs_low, obs_high = get_observation_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(obs_low), T.(obs_high))
+end
+
+function DRiL.action_space(env::HalfCheetahEnv)
+    act_low, act_high = get_action_bounds(env)
+    T = typeof(env.forward_reward_weight)
+    return DRiL.Box(T.(act_low), T.(act_high))
+end
+
+function DRiL.get_info(env::HalfCheetahEnv)
+    return Dict{String, Any}(
+        "timestep" => env.timestep,
+        "max_episode_steps" => env.max_episode_steps
+    )
 end

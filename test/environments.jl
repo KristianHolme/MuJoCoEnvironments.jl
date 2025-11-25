@@ -1,5 +1,4 @@
 @testitem "HalfCheetahEnv" begin
-    using MuJoCoEnvironments
 
     env = HalfCheetahEnv(max_episode_steps = 100)
     @test env isa HalfCheetahEnv
@@ -10,7 +9,6 @@
 end
 
 @testitem "HopperEnv" begin
-    using MuJoCoEnvironments
 
     env = HopperEnv(max_episode_steps = 100)
     @test env isa HopperEnv
@@ -21,7 +19,6 @@ end
 end
 
 @testitem "Walker2dEnv" begin
-    using MuJoCoEnvironments
 
     env = Walker2dEnv(max_episode_steps = 100)
     @test env isa Walker2dEnv
@@ -32,18 +29,16 @@ end
 end
 
 @testitem "AntEnv" begin
-    using MuJoCoEnvironments
 
     env = AntEnv(max_episode_steps = 100)
     @test env isa AntEnv
     obs = reset_env!(env)
-    @test length(obs) == 27  # nq-2 + nv = 15-2 + 14 = 27
+    @test length(obs) == 105
     low, high = get_action_bounds(env)
     @test length(low) == 8
 end
 
 @testitem "HumanoidEnv" begin
-    using MuJoCoEnvironments
 
     env = HumanoidEnv(max_episode_steps = 100)
     @test env isa HumanoidEnv
@@ -53,7 +48,6 @@ end
 end
 
 @testitem "SwimmerEnv" begin
-    using MuJoCoEnvironments
 
     env = SwimmerEnv(max_episode_steps = 100)
     @test env isa SwimmerEnv
@@ -64,7 +58,6 @@ end
 end
 
 @testitem "Type Parameters - Float32" begin
-    using MuJoCoEnvironments
 
     env = HalfCheetahEnv(
         max_episode_steps = 100,
@@ -76,7 +69,6 @@ end
 end
 
 @testitem "Type Parameters - Custom RNG" begin
-    using MuJoCoEnvironments
     using Random
 
     rng = Random.MersenneTwister(123)
