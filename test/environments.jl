@@ -9,7 +9,6 @@
 end
 
 @testitem "HopperEnv" begin
-
     env = HopperEnv(max_episode_steps = 100)
     @test env isa HopperEnv
     obs = reset_env!(env)
