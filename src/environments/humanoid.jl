@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HumanoidEnv{T, R} <: DRiL.AbstractEnv
+    HumanoidEnv{T, R} <: Drill.AbstractEnv
 
 Humanoid environment - a 3D bipedal robot that must learn to walk forward.
 
@@ -143,13 +143,13 @@ function get_observation_bounds(env::HumanoidEnv)
     return fill(-Inf, obs_size), fill(Inf, obs_size)
 end
 
-# DRiL interface implementation
-function DRiL.reset!(env::HumanoidEnv)
+# Drill interface implementation
+function Drill.reset!(env::HumanoidEnv)
     reset_env!(env)
     return nothing
 end
 
-function DRiL.act!(env::HumanoidEnv, action::AbstractVector)
+function Drill.act!(env::HumanoidEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -157,31 +157,31 @@ function DRiL.act!(env::HumanoidEnv, action::AbstractVector)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 
-function DRiL.observe(env::HumanoidEnv)
+function Drill.observe(env::HumanoidEnv)
     return get_observation(env)
 end
 
-function DRiL.terminated(env::HumanoidEnv)
+function Drill.terminated(env::HumanoidEnv)
     return is_terminated(env)
 end
 
-function DRiL.truncated(env::HumanoidEnv)
+function Drill.truncated(env::HumanoidEnv)
     return is_truncated(env)
 end
 
-function DRiL.observation_space(env::HumanoidEnv)
+function Drill.observation_space(env::HumanoidEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return DRiL.Box(T.(obs_low), T.(obs_high))
+    return Drill.Box(T.(obs_low), T.(obs_high))
 end
 
-function DRiL.action_space(env::HumanoidEnv)
+function Drill.action_space(env::HumanoidEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return DRiL.Box(T.(act_low), T.(act_high))
+    return Drill.Box(T.(act_low), T.(act_high))
 end
 
-function DRiL.get_info(env::HumanoidEnv)
+function Drill.get_info(env::HumanoidEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

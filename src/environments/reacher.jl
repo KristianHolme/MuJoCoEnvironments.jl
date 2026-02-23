@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    ReacherEnv{T, R} <: DRiL.AbstractEnv
+    ReacherEnv{T, R} <: Drill.AbstractEnv
 
 Reacher environment - a two-jointed robot arm.
 
@@ -157,13 +157,13 @@ function get_observation_bounds(env::ReacherEnv)
     return fill(-Inf, obs_size), fill(Inf, obs_size)
 end
 
-# DRiL interface implementation
-function DRiL.reset!(env::ReacherEnv)
+# Drill interface implementation
+function Drill.reset!(env::ReacherEnv)
     reset_env!(env)
     return nothing
 end
 
-function DRiL.act!(env::ReacherEnv, action::AbstractVector)
+function Drill.act!(env::ReacherEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -171,31 +171,31 @@ function DRiL.act!(env::ReacherEnv, action::AbstractVector)
     return convert(eltype(env.reward_dist_weight), reward)
 end
 
-function DRiL.observe(env::ReacherEnv)
+function Drill.observe(env::ReacherEnv)
     return get_observation(env)
 end
 
-function DRiL.terminated(env::ReacherEnv)
+function Drill.terminated(env::ReacherEnv)
     return is_terminated(env)
 end
 
-function DRiL.truncated(env::ReacherEnv)
+function Drill.truncated(env::ReacherEnv)
     return is_truncated(env)
 end
 
-function DRiL.observation_space(env::ReacherEnv)
+function Drill.observation_space(env::ReacherEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.reward_dist_weight)
-    return DRiL.Box(T.(obs_low), T.(obs_high))
+    return Drill.Box(T.(obs_low), T.(obs_high))
 end
 
-function DRiL.action_space(env::ReacherEnv)
+function Drill.action_space(env::ReacherEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.reward_dist_weight)
-    return DRiL.Box(T.(act_low), T.(act_high))
+    return Drill.Box(T.(act_low), T.(act_high))
 end
 
-function DRiL.get_info(env::ReacherEnv)
+function Drill.get_info(env::ReacherEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

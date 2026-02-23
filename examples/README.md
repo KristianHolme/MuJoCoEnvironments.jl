@@ -20,19 +20,19 @@ julia examples/basic_usage.jl
 ```
 
 ### 2. `dril_interface_example.jl`
-Using MuJoCo environments with the DRiL.jl interface.
+Using MuJoCo environments with the Drill.jl interface.
 
 **What it covers:**
-- Creating environments with DRiL interface
-- Using DRiL's standard methods (`reset!`, `act!`, `observe`, etc.)
-- Working with DRiL spaces
+- Creating environments with Drill interface
+- Using Drill's standard methods (`reset!`, `act!`, `observe`, etc.)
+- Working with Drill spaces
 - Seeding for reproducibility
 - Wrapper pattern for existing environments
 
 **Prerequisites:**
 ```julia
 using Pkg
-Pkg.add("DRiL")
+Pkg.add("Drill")
 ```
 
 **Run with:**
@@ -124,7 +124,7 @@ If you encounter issues:
 
 1. **Model not found warnings**: This is expected if MuJoCo model files aren't in the standard location. The environment will use a fallback sample model.
 
-2. **Extension not loading**: Make sure you have the interface package installed (DRiL or CommonRLInterface) before running those examples.
+2. **Extension not loading**: Make sure you have the interface package installed (Drill or CommonRLInterface) before running those examples.
 
 3. **Rendering issues**: Ensure you have the MuJoCo visualizer properly installed and initialized.
 
@@ -132,6 +132,6 @@ If you encounter issues:
 
 - Main package documentation: See the main README.md
 - MuJoCo.jl documentation: https://github.com/JamieMair/MuJoCo.jl
-- DRiL.jl: https://github.com/KristianHolme/DRiL.jl
+- Drill.jl: https://github.com/KristianHolme/Drill.jl
 - CommonRLInterface.jl: https://github.com/JuliaReinforcementLearning/CommonRLInterface.jl
 

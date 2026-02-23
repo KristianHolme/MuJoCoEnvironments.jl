@@ -2,7 +2,7 @@ module MuJoCoEnvironments
 
 using MuJoCo
 using Random
-using DRiL
+using Drill
 
 # Core interface
 include("core_interface.jl")

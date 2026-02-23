@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HopperEnv{T, R} <: DRiL.AbstractEnv
+    HopperEnv{T, R} <: Drill.AbstractEnv
 
 Hopper environment - a 2D one-legged robot that must learn to hop forward.
 
@@ -145,13 +145,13 @@ function get_observation_bounds(env::HopperEnv)
     return fill(-Inf, obs_size), fill(Inf, obs_size)
 end
 
-# DRiL interface implementation
-function DRiL.reset!(env::HopperEnv)
+# Drill interface implementation
+function Drill.reset!(env::HopperEnv)
     reset_env!(env)
     return nothing
 end
 
-function DRiL.act!(env::HopperEnv, action::AbstractVector)
+function Drill.act!(env::HopperEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -159,31 +159,31 @@ function DRiL.act!(env::HopperEnv, action::AbstractVector)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 
-function DRiL.observe(env::HopperEnv)
+function Drill.observe(env::HopperEnv)
     return get_observation(env)
 end
 
-function DRiL.terminated(env::HopperEnv)
+function Drill.terminated(env::HopperEnv)
     return is_terminated(env)
 end
 
-function DRiL.truncated(env::HopperEnv)
+function Drill.truncated(env::HopperEnv)
     return is_truncated(env)
 end
 
-function DRiL.observation_space(env::HopperEnv)
+function Drill.observation_space(env::HopperEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return DRiL.Box(T.(obs_low), T.(obs_high))
+    return Drill.Box(T.(obs_low), T.(obs_high))
 end
 
-function DRiL.action_space(env::HopperEnv)
+function Drill.action_space(env::HopperEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return DRiL.Box(T.(act_low), T.(act_high))
+    return Drill.Box(T.(act_low), T.(act_high))
 end
 
-function DRiL.get_info(env::HopperEnv)
+function Drill.get_info(env::HopperEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

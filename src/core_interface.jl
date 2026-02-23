@@ -2,7 +2,7 @@
 # Core Internal Interface
 # ------------------------------------------------------------
 """
-    _AbstractMuJoCoEnv{T} <: DRiL.AbstractEnv
+    _AbstractMuJoCoEnv{T} <: Drill.AbstractEnv
 
 Internal abstract base type for MuJoCo environments.
 
@@ -10,9 +10,9 @@ Internal abstract base type for MuJoCo environments.
 - `T`: Floating point type used for weights, parameters, and observations (e.g., `Float32`, `Float64`)
 
 This is an internal interface used for shared functionality. All MuJoCo environments
-inherit from this type and thus implement DRiL.AbstractEnv.
+inherit from this type and thus implement Drill.AbstractEnv.
 """
-abstract type _AbstractMuJoCoEnv{T} <: DRiL.AbstractEnv end
+abstract type _AbstractMuJoCoEnv{T} <: Drill.AbstractEnv end
 
 """
     reset_env!(env::_AbstractMuJoCoEnv{T}) -> observation

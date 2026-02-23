@@ -1,27 +1,27 @@
-# DRiL Interface Example
-# This example shows how to use MuJoCo environments with the DRiL.jl interface
+# Drill Interface Example
+# This example shows how to use MuJoCo environments with the Drill.jl interface
 
 using MuJoCoEnvironments
-using DRiL  # This will load the DRiL extension automatically
+using Drill  # This will load the Drill extension automatically
 using Random
 
 println("="^60)
-println("DRiL Interface Example")
+println("Drill Interface Example")
 println("="^60)
 
-# Create a HalfCheetah environment with DRiL interface
-println("\nCreating HalfCheetah with DRiL interface...")
+# Create a HalfCheetah environment with Drill interface
+println("\nCreating HalfCheetah with Drill interface...")
 core_env = HalfCheetahEnv(max_episode_steps = 200)
-env = convert(DRiL.AbstractEnv, core_env)
+env = convert(Drill.AbstractEnv, core_env)
 
 println("Environment type: ", typeof(env))
-println("Observation space: ", DRiL.observation_space(env))
-println("Action space: ", DRiL.action_space(env))
+println("Observation space: ", Drill.observation_space(env))
+println("Action space: ", Drill.action_space(env))
 
 # Reset the environment
 println("\nResetting environment...")
-DRiL.reset!(env)
-obs = DRiL.observe(env)
+Drill.reset!(env)
+obs = Drill.observe(env)
 println("Initial observation size: ", size(obs))
 println("First 5 observation values: ", obs[1:min(5, length(obs))])
 
@@ -32,19 +32,19 @@ episode_length = 0
 
 for step in 1:100
     # Sample random action from action space
-    action = rand(env.core_env.rng, DRiL.action_space(env))
+    action = rand(env.core_env.rng, Drill.action_space(env))
 
     # Take a step
-    reward = DRiL.act!(env, action)
-    obs = DRiL.observe(env)
+    reward = Drill.act!(env, action)
+    obs = Drill.observe(env)
 
     total_reward += reward
     episode_length += 1
 
     # Check if episode ended
-    if DRiL.terminated(env) || DRiL.truncated(env)
+    if Drill.terminated(env) || Drill.truncated(env)
         println("Episode ended at step $episode_length")
-        println("Terminated: $(DRiL.terminated(env)), Truncated: $(DRiL.truncated(env))")
+        println("Terminated: $(Drill.terminated(env)), Truncated: $(Drill.truncated(env))")
         break
     end
 
@@ -65,12 +65,12 @@ println("Testing reproducibility with seeding...")
 println("="^60)
 
 Random.seed!(env, 123)
-DRiL.reset!(env)
-obs1 = DRiL.observe(env)
+Drill.reset!(env)
+obs1 = Drill.observe(env)
 
 Random.seed!(env, 123)
-DRiL.reset!(env)
-obs2 = DRiL.observe(env)
+Drill.reset!(env)
+obs2 = Drill.observe(env)
 
 println("Observations match after same seed: ", obs1 ≈ obs2)
 
@@ -82,25 +82,25 @@ println("="^60)
 # Create core environment
 core_hopper = HopperEnv(max_episode_steps = 150)
 
-# Wrap it for DRiL
-dril_hopper = convert(DRiL.AbstractEnv, core_hopper)
+# Wrap it for Drill
+dril_hopper = convert(Drill.AbstractEnv, core_hopper)
 
 println("Created wrapped Hopper environment")
-println("Observation space: ", DRiL.observation_space(dril_hopper))
-println("Action space: ", DRiL.action_space(dril_hopper))
+println("Observation space: ", Drill.observation_space(dril_hopper))
+println("Action space: ", Drill.action_space(dril_hopper))
 
 # Run a short episode
-DRiL.reset!(dril_hopper)
+Drill.reset!(dril_hopper)
 for step in 1:10
-    action = randn(length(DRiL.action_space(dril_hopper).low))
-    reward = DRiL.act!(dril_hopper, action)
+    action = randn(length(Drill.action_space(dril_hopper).low))
+    reward = Drill.act!(dril_hopper, action)
 
-    if DRiL.terminated(dril_hopper)
+    if Drill.terminated(dril_hopper)
         println("Hopper fell down at step $step")
         break
     end
 end
 
 println("\n" * "="^60)
-println("DRiL interface example completed!")
+println("Drill interface example completed!")
 println("="^60)

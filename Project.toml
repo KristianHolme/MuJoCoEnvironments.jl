@@ -4,13 +4,13 @@ version = "0.0.1-DEV"
 authors = ["Kristian Holme <holme.kristian@gmail.com> and contributors"]
 
 [deps]
-DRiL = "49b37b9d-a8e6-4364-9144-4677bcb8a7f0"
+Drill = "49b37b9d-a8e6-4364-9144-4677bcb8a7f0"
 MuJoCo = "1c101251-5e0f-4746-b44c-0728d433b68a"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 Aqua = "0.8"
-DRiL = "0.0.1"
+Drill = "0.0.1"
 JET = "0.11"
 MuJoCo = "0.2"
 Random = "1"
@@ -20,13 +20,13 @@ julia = "1.11"
 
 [extras]
 Aqua = "4c88cf16-eb10-579e-8560-4a9242c79595"
-DRiL = "49b37b9d-a8e6-4364-9144-4677bcb8a7f0"
+Drill = "49b37b9d-a8e6-4364-9144-4677bcb8a7f0"
 JET = "c3a54625-cd67-489e-a8e7-0a5a0ff4e31b"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 TestItemRunner = "f8b46487-2199-4994-9208-9a1283c18c0a"
 
 [targets]
-test = ["Aqua", "DRiL", "JET", "Test", "TestItemRunner"]
+test = ["Aqua", "Drill", "JET", "Test", "TestItemRunner"]
 
 [sources]
-DRiL = {url = "https://github.com/KristianHolme/DRiL.jl.git", rev = "dev"}
+Drill = {url = "https://github.com/KristianHolme/Drill.jl.git", rev = "dev"}

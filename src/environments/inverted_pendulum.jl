@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    InvertedPendulumEnv{T, R} <: DRiL.AbstractEnv
+    InvertedPendulumEnv{T, R} <: Drill.AbstractEnv
 
 Inverted Pendulum environment - MuJoCo version of CartPole.
 
@@ -103,13 +103,13 @@ function get_observation_bounds(env::InvertedPendulumEnv)
     return fill(-Inf, obs_size), fill(Inf, obs_size)
 end
 
-# DRiL interface implementation
-function DRiL.reset!(env::InvertedPendulumEnv)
+# Drill interface implementation
+function Drill.reset!(env::InvertedPendulumEnv)
     reset_env!(env)
     return nothing
 end
 
-function DRiL.act!(env::InvertedPendulumEnv, action::AbstractVector)
+function Drill.act!(env::InvertedPendulumEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -117,31 +117,31 @@ function DRiL.act!(env::InvertedPendulumEnv, action::AbstractVector)
     return convert(eltype(env.reset_noise_scale), reward)
 end
 
-function DRiL.observe(env::InvertedPendulumEnv)
+function Drill.observe(env::InvertedPendulumEnv)
     return get_observation(env)
 end
 
-function DRiL.terminated(env::InvertedPendulumEnv)
+function Drill.terminated(env::InvertedPendulumEnv)
     return is_terminated(env)
 end
 
-function DRiL.truncated(env::InvertedPendulumEnv)
+function Drill.truncated(env::InvertedPendulumEnv)
     return is_truncated(env)
 end
 
-function DRiL.observation_space(env::InvertedPendulumEnv)
+function Drill.observation_space(env::InvertedPendulumEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.reset_noise_scale)
-    return DRiL.Box(T.(obs_low), T.(obs_high))
+    return Drill.Box(T.(obs_low), T.(obs_high))
 end
 
-function DRiL.action_space(env::InvertedPendulumEnv)
+function Drill.action_space(env::InvertedPendulumEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.reset_noise_scale)
-    return DRiL.Box(T.(act_low), T.(act_high))
+    return Drill.Box(T.(act_low), T.(act_high))
 end
 
-function DRiL.get_info(env::InvertedPendulumEnv)
+function Drill.get_info(env::InvertedPendulumEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps
