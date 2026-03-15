@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    Walker2dEnv{T, R} <: Drill.AbstractEnv
+    Walker2dEnv{T, R} <: DrillInterface.AbstractEnv
 
 Walker2d environment - a 2D two-legged robot that must learn to walk forward.
 
@@ -145,12 +145,12 @@ function get_observation_bounds(env::Walker2dEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::Walker2dEnv)
+function DrillInterface.reset!(env::Walker2dEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::Walker2dEnv, action::AbstractVector)
+function DrillInterface.act!(env::Walker2dEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -158,31 +158,31 @@ function Drill.act!(env::Walker2dEnv, action::AbstractVector)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 
-function Drill.observe(env::Walker2dEnv)
+function DrillInterface.observe(env::Walker2dEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::Walker2dEnv)
+function DrillInterface.terminated(env::Walker2dEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::Walker2dEnv)
+function DrillInterface.truncated(env::Walker2dEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::Walker2dEnv)
+function DrillInterface.observation_space(env::Walker2dEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::Walker2dEnv)
+function DrillInterface.action_space(env::Walker2dEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::Walker2dEnv)
+function DrillInterface.get_info(env::Walker2dEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

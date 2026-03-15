@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    PusherEnv{T, R} <: Drill.AbstractEnv
+    PusherEnv{T, R} <: DrillInterface.AbstractEnv
 
 Pusher environment - a multi-jointed robot arm.
 
@@ -169,12 +169,12 @@ function get_observation_bounds(env::PusherEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::PusherEnv)
+function DrillInterface.reset!(env::PusherEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::PusherEnv, action::AbstractVector)
+function DrillInterface.act!(env::PusherEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -182,31 +182,31 @@ function Drill.act!(env::PusherEnv, action::AbstractVector)
     return convert(eltype(env.reward_near_weight), reward)
 end
 
-function Drill.observe(env::PusherEnv)
+function DrillInterface.observe(env::PusherEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::PusherEnv)
+function DrillInterface.terminated(env::PusherEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::PusherEnv)
+function DrillInterface.truncated(env::PusherEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::PusherEnv)
+function DrillInterface.observation_space(env::PusherEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.reward_near_weight)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::PusherEnv)
+function DrillInterface.action_space(env::PusherEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.reward_near_weight)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::PusherEnv)
+function DrillInterface.get_info(env::PusherEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

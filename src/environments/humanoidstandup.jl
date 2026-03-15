@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HumanoidStandupEnv{T, R} <: Drill.AbstractEnv
+    HumanoidStandupEnv{T, R} <: DrillInterface.AbstractEnv
 
 Humanoid Standup environment - 3D bipedal robot learning to stand up.
 
@@ -180,12 +180,12 @@ function get_action_bounds(env::HumanoidStandupEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::HumanoidStandupEnv)
+function DrillInterface.reset!(env::HumanoidStandupEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::HumanoidStandupEnv, action::AbstractVector)
+function DrillInterface.act!(env::HumanoidStandupEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -193,31 +193,31 @@ function Drill.act!(env::HumanoidStandupEnv, action::AbstractVector)
     return convert(eltype(env.ctrl_cost_weight), reward)
 end
 
-function Drill.observe(env::HumanoidStandupEnv)
+function DrillInterface.observe(env::HumanoidStandupEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::HumanoidStandupEnv)
+function DrillInterface.terminated(env::HumanoidStandupEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::HumanoidStandupEnv)
+function DrillInterface.truncated(env::HumanoidStandupEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::HumanoidStandupEnv)
+function DrillInterface.observation_space(env::HumanoidStandupEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.ctrl_cost_weight)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::HumanoidStandupEnv)
+function DrillInterface.action_space(env::HumanoidStandupEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.ctrl_cost_weight)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::HumanoidStandupEnv)
+function DrillInterface.get_info(env::HumanoidStandupEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

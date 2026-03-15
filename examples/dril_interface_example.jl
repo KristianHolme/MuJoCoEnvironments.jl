@@ -15,13 +15,13 @@ core_env = HalfCheetahEnv(max_episode_steps = 200)
 env = convert(Drill.AbstractEnv, core_env)
 
 println("Environment type: ", typeof(env))
-println("Observation space: ", Drill.observation_space(env))
-println("Action space: ", Drill.action_space(env))
+println("Observation space: ", DrillInterface.observation_space(env))
+println("Action space: ", DrillInterface.action_space(env))
 
 # Reset the environment
 println("\nResetting environment...")
-Drill.reset!(env)
-obs = Drill.observe(env)
+DrillInterface.reset!(env)
+obs = DrillInterface.observe(env)
 println("Initial observation size: ", size(obs))
 println("First 5 observation values: ", obs[1:min(5, length(obs))])
 
@@ -32,19 +32,19 @@ episode_length = 0
 
 for step in 1:100
     # Sample random action from action space
-    action = rand(env.core_env.rng, Drill.action_space(env))
+    action = rand(env.core_env.rng, DrillInterface.action_space(env))
 
     # Take a step
-    reward = Drill.act!(env, action)
-    obs = Drill.observe(env)
+    reward = DrillInterface.act!(env, action)
+    obs = DrillInterface.observe(env)
 
     total_reward += reward
     episode_length += 1
 
     # Check if episode ended
-    if Drill.terminated(env) || Drill.truncated(env)
+    if DrillInterface.terminated(env) || DrillInterface.truncated(env)
         println("Episode ended at step $episode_length")
-        println("Terminated: $(Drill.terminated(env)), Truncated: $(Drill.truncated(env))")
+        println("Terminated: $(DrillInterface.terminated(env)), Truncated: $(DrillInterface.truncated(env))")
         break
     end
 
@@ -65,12 +65,12 @@ println("Testing reproducibility with seeding...")
 println("="^60)
 
 Random.seed!(env, 123)
-Drill.reset!(env)
-obs1 = Drill.observe(env)
+DrillInterface.reset!(env)
+obs1 = DrillInterface.observe(env)
 
 Random.seed!(env, 123)
-Drill.reset!(env)
-obs2 = Drill.observe(env)
+DrillInterface.reset!(env)
+obs2 = DrillInterface.observe(env)
 
 println("Observations match after same seed: ", obs1 ≈ obs2)
 
@@ -86,16 +86,16 @@ core_hopper = HopperEnv(max_episode_steps = 150)
 dril_hopper = convert(Drill.AbstractEnv, core_hopper)
 
 println("Created wrapped Hopper environment")
-println("Observation space: ", Drill.observation_space(dril_hopper))
-println("Action space: ", Drill.action_space(dril_hopper))
+println("Observation space: ", DrillInterface.observation_space(dril_hopper))
+println("Action space: ", DrillInterface.action_space(dril_hopper))
 
 # Run a short episode
-Drill.reset!(dril_hopper)
+DrillInterface.reset!(dril_hopper)
 for step in 1:10
-    action = randn(length(Drill.action_space(dril_hopper).low))
-    reward = Drill.act!(dril_hopper, action)
+    action = randn(length(DrillInterface.action_space(dril_hopper).low))
+    reward = DrillInterface.act!(dril_hopper, action)
 
-    if Drill.terminated(dril_hopper)
+    if DrillInterface.terminated(dril_hopper)
         println("Hopper fell down at step $step")
         break
     end

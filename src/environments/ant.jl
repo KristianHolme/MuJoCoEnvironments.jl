@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    AntEnv{T, R} <: Drill.AbstractEnv
+    AntEnv{T, R} <: DrillInterface.AbstractEnv
 
 Ant environment - a 4-legged robot that must learn to walk forward.
 
@@ -200,12 +200,12 @@ function get_observation_bounds(env::AntEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::AntEnv)
+function DrillInterface.reset!(env::AntEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::AntEnv, action::AbstractVector)
+function DrillInterface.act!(env::AntEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -213,31 +213,31 @@ function Drill.act!(env::AntEnv, action::AbstractVector)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 
-function Drill.observe(env::AntEnv)
+function DrillInterface.observe(env::AntEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::AntEnv)
+function DrillInterface.terminated(env::AntEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::AntEnv)
+function DrillInterface.truncated(env::AntEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::AntEnv)
+function DrillInterface.observation_space(env::AntEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::AntEnv)
+function DrillInterface.action_space(env::AntEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::AntEnv)
+function DrillInterface.get_info(env::AntEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

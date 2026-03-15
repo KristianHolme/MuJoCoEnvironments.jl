@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    HopperEnv{T, R} <: Drill.AbstractEnv
+    HopperEnv{T, R} <: DrillInterface.AbstractEnv
 
 Hopper environment - a 2D one-legged robot that must learn to hop forward.
 
@@ -146,12 +146,12 @@ function get_observation_bounds(env::HopperEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::HopperEnv)
+function DrillInterface.reset!(env::HopperEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::HopperEnv, action::AbstractVector)
+function DrillInterface.act!(env::HopperEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -159,31 +159,31 @@ function Drill.act!(env::HopperEnv, action::AbstractVector)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 
-function Drill.observe(env::HopperEnv)
+function DrillInterface.observe(env::HopperEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::HopperEnv)
+function DrillInterface.terminated(env::HopperEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::HopperEnv)
+function DrillInterface.truncated(env::HopperEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::HopperEnv)
+function DrillInterface.observation_space(env::HopperEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::HopperEnv)
+function DrillInterface.action_space(env::HopperEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::HopperEnv)
+function DrillInterface.get_info(env::HopperEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

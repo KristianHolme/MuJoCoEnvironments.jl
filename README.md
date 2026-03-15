@@ -54,10 +54,10 @@ using Drill  # Automatically loads the extension
 env = DrillHalfCheetahEnv(max_episode_steps=1000)
 
 # Use Drill interface
-Drill.reset!(env)
-obs = Drill.observe(env)
-action = rand(Drill.action_space(env))
-reward = Drill.act!(env, action)
+DrillInterface.reset!(env)
+obs = DrillInterface.observe(env)
+action = rand(DrillInterface.action_space(env))
+reward = DrillInterface.act!(env, action)
 ```
 
 ### Using with CommonRLInterface.jl

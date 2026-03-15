@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    InvertedDoublePendulumEnv{T, R} <: Drill.AbstractEnv
+    InvertedDoublePendulumEnv{T, R} <: DrillInterface.AbstractEnv
 
 Inverted Double Pendulum environment - 2 pole variation of CartPole.
 
@@ -139,12 +139,12 @@ function get_observation_bounds(env::InvertedDoublePendulumEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::InvertedDoublePendulumEnv)
+function DrillInterface.reset!(env::InvertedDoublePendulumEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::InvertedDoublePendulumEnv, action::AbstractVector)
+function DrillInterface.act!(env::InvertedDoublePendulumEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -152,31 +152,31 @@ function Drill.act!(env::InvertedDoublePendulumEnv, action::AbstractVector)
     return convert(eltype(env.healthy_reward), reward)
 end
 
-function Drill.observe(env::InvertedDoublePendulumEnv)
+function DrillInterface.observe(env::InvertedDoublePendulumEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::InvertedDoublePendulumEnv)
+function DrillInterface.terminated(env::InvertedDoublePendulumEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::InvertedDoublePendulumEnv)
+function DrillInterface.truncated(env::InvertedDoublePendulumEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::InvertedDoublePendulumEnv)
+function DrillInterface.observation_space(env::InvertedDoublePendulumEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.healthy_reward)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::InvertedDoublePendulumEnv)
+function DrillInterface.action_space(env::InvertedDoublePendulumEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.healthy_reward)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::InvertedDoublePendulumEnv)
+function DrillInterface.get_info(env::InvertedDoublePendulumEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps

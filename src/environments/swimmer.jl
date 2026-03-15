@@ -3,7 +3,7 @@
 # ------------------------------------------------------------
 
 """
-    SwimmerEnv{T, R} <: Drill.AbstractEnv
+    SwimmerEnv{T, R} <: DrillInterface.AbstractEnv
 
 Swimmer environment - a 3-link swimming robot that must learn to swim forward.
 
@@ -125,12 +125,12 @@ function is_terminated(env::SwimmerEnv)
 end
 
 # Drill interface implementation
-function Drill.reset!(env::SwimmerEnv)
+function DrillInterface.reset!(env::SwimmerEnv)
     reset_env!(env)
     return nothing
 end
 
-function Drill.act!(env::SwimmerEnv, action::AbstractVector)
+function DrillInterface.act!(env::SwimmerEnv, action::AbstractVector)
     obs, reward, terminated, truncated, info = step_env!(env, action)
     if terminated || truncated
         info["terminal_observation"] = obs
@@ -138,31 +138,31 @@ function Drill.act!(env::SwimmerEnv, action::AbstractVector)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 
-function Drill.observe(env::SwimmerEnv)
+function DrillInterface.observe(env::SwimmerEnv)
     return get_observation(env)
 end
 
-function Drill.terminated(env::SwimmerEnv)
+function DrillInterface.terminated(env::SwimmerEnv)
     return is_terminated(env)
 end
 
-function Drill.truncated(env::SwimmerEnv)
+function DrillInterface.truncated(env::SwimmerEnv)
     return is_truncated(env)
 end
 
-function Drill.observation_space(env::SwimmerEnv)
+function DrillInterface.observation_space(env::SwimmerEnv)
     obs_low, obs_high = get_observation_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(obs_low), T.(obs_high))
+    return DrillInterface.Box(T.(obs_low), T.(obs_high))
 end
 
-function Drill.action_space(env::SwimmerEnv)
+function DrillInterface.action_space(env::SwimmerEnv)
     act_low, act_high = get_action_bounds(env)
     T = typeof(env.forward_reward_weight)
-    return Drill.Box(T.(act_low), T.(act_high))
+    return DrillInterface.Box(T.(act_low), T.(act_high))
 end
 
-function Drill.get_info(env::SwimmerEnv)
+function DrillInterface.get_info(env::SwimmerEnv)
     return Dict{String, Any}(
         "timestep" => env.timestep,
         "max_episode_steps" => env.max_episode_steps
