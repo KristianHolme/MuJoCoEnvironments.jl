@@ -42,6 +42,8 @@ end
     env = HumanoidEnv(max_episode_steps = 100)
     @test env isa HumanoidEnv
     obs = reset_env!(env)
+    obs_low, obs_high = get_observation_bounds(env)
+    @test length(obs) == length(obs_low)
     low, high = get_action_bounds(env)
     @test length(low) == 17
 end
@@ -54,6 +56,53 @@ end
     @test length(obs) == 8  # nq-2 + nv = 5-2 + 5 = 8
     low, high = get_action_bounds(env)
     @test length(low) == 2
+end
+
+@testitem "ReacherEnv" begin
+    env = ReacherEnv(max_episode_steps = 100)
+    @test env isa ReacherEnv
+    obs = reset_env!(env)
+    @test length(obs) == 10
+    low, high = get_action_bounds(env)
+    @test length(low) == 2
+end
+
+@testitem "PusherEnv" begin
+    env = PusherEnv(max_episode_steps = 100)
+    @test env isa PusherEnv
+    obs = reset_env!(env)
+    @test length(obs) == 23
+    low, high = get_action_bounds(env)
+    @test length(low) == 7
+end
+
+@testitem "InvertedPendulumEnv" begin
+    env = InvertedPendulumEnv(max_episode_steps = 100)
+    @test env isa InvertedPendulumEnv
+    obs = reset_env!(env)
+    @test length(obs) == 4
+    low, high = get_action_bounds(env)
+    @test length(low) == 1
+    @test low[1] == -3.0 && high[1] == 3.0
+end
+
+@testitem "InvertedDoublePendulumEnv" begin
+    env = InvertedDoublePendulumEnv(max_episode_steps = 100)
+    @test env isa InvertedDoublePendulumEnv
+    obs = reset_env!(env)
+    @test length(obs) == 9
+    low, high = get_action_bounds(env)
+    @test length(low) == 1
+end
+
+@testitem "HumanoidStandupEnv" begin
+    env = HumanoidStandupEnv(max_episode_steps = 100)
+    @test env isa HumanoidStandupEnv
+    obs = reset_env!(env)
+    obs_low, obs_high = get_observation_bounds(env)
+    @test length(obs) == length(obs_low)
+    low, high = get_action_bounds(env)
+    @test length(low) == 17
 end
 
 @testitem "Type Parameters - Float32" begin
