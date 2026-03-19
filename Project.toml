@@ -15,7 +15,7 @@ DrillInterface = { rev = "main", subdir = "DrillInterface", url = "https://githu
 [compat]
 Aqua = "0.8"
 DrillInterface = "0.1"
-JET = "0.11"
+JET = "0"
 LinearAlgebra = "1"
 MuJoCo = "0.2"
 Random = "1"
