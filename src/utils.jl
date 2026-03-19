@@ -6,32 +6,6 @@ using MuJoCo
 using Random
 
 """
-    MuJoCoEnvBase{T, R}
-
-Base structure for MuJoCo environments containing common fields.
-
-# Type Parameters
-- `T`: Floating point type used by the environment
-- `R`: Concrete type of the random number generator (default: Julia's default RNG)
-
-# Fields
-- `model::MuJoCo.Model`: MuJoCo model
-- `data::MuJoCo.Data`: MuJoCo data (state)
-- `timestep::Int`: Current timestep in the episode
-- `max_episode_steps::Int`: Maximum number of steps per episode
-- `frame_skip::Int`: Number of simulation steps per environment step
-- `rng::R`: Random number generator
-"""
-mutable struct MuJoCoEnvBase{T, R} <: _AbstractMuJoCoEnv{T}
-    model::MuJoCo.Model
-    data::MuJoCo.Data
-    timestep::Int
-    max_episode_steps::Int
-    frame_skip::Int
-    rng::R
-end
-
-"""
     load_model_from_path(model_path::String) -> (model, data)
 
 Load a MuJoCo model and create initial data from an XML file path.

@@ -9,18 +9,19 @@ include("core_interface.jl")
 # _AbstractMuJoCoEnv is internal, not exported
 
 # Base functionality
-include("mujoco_env_base.jl")
-export MuJoCoEnvBase, load_model_from_path, get_model_path
-export apply_action!, forward_step!, reset_mujoco_state!, is_truncated
-export get_qpos, get_qvel, get_ctrl, clip_action
+include("utils.jl")
+export get_model_path, load_model_from_path
+export apply_action!, forward_step!, is_truncated, reset_mujoco_state!
+export clip_action, get_ctrl, get_qpos, get_qvel
 
 # Core interface functions
-export reset_env!, step_env!, get_observation, get_action_bounds, get_observation_bounds, is_terminated
+export get_action_bounds, get_observation, get_observation_bounds, is_terminated, reset_env!,
+    step_env!
 # Random.seed! is exported via Random module, but available for all environments
 
 # Rendering
 include("rendering.jl")
-export render, close_render
+export close_render, render
 
 # Environments
 include("environments/halfcheetah.jl")
@@ -35,7 +36,8 @@ include("environments/reacher.jl")
 include("environments/pusher.jl")
 include("environments/humanoidstandup.jl")
 
-export HalfCheetahEnv, HopperEnv, Walker2dEnv, AntEnv, HumanoidEnv, SwimmerEnv
-export InvertedPendulumEnv, InvertedDoublePendulumEnv, ReacherEnv, PusherEnv, HumanoidStandupEnv
+export AntEnv, HalfCheetahEnv, HopperEnv, HumanoidEnv, SwimmerEnv, Walker2dEnv
+export HumanoidStandupEnv, InvertedDoublePendulumEnv, InvertedPendulumEnv, PusherEnv,
+    ReacherEnv
 
 end

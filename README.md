@@ -8,7 +8,7 @@ MuJoCoEnvironments.jl provides a collection of reinforcement learning environmen
 
 ## Features
 
-- **Multiple Environments**: HalfCheetah, Hopper, Walker2d, Ant, Humanoid, Swimmer
+- **Multiple Environments**: HalfCheetah, Hopper, Walker2d, Ant, Humanoid, Swimmer, InvertedPendulum, InvertedDoublePendulum, Reacher, Pusher, HumanoidStandup
 - **Core interface**: `reset_env!`, `step_env!`, `get_observation`, action/observation bounds
 - **Drill.jl**: Environments work with DrillInterface for use in Drill pipelines
 - **MuJoCo.jl Integration**: Uses native Julia bindings for MuJoCo physics simulation
@@ -23,6 +23,7 @@ Pkg.add("MuJoCoEnvironments")
 ```
 
 For development:
+
 ```julia
 Pkg.develop(path="path/to/MuJoCoEnvironments")
 ```
@@ -49,28 +50,33 @@ obs, reward, terminated, truncated, info = step_env!(env, action)
 
 ```julia
 using MuJoCoEnvironments
-using Drill
+using Drill # Drill reexports the DrillInterface interfaces
 
-# Create environment with Drill interface
-env = DrillHalfCheetahEnv(max_episode_steps=1000)
+# Create environment (implements DrillInterface directly)
+env = HalfCheetahEnv(max_episode_steps=1000)
 
 # Use Drill interface
-DrillInterface.reset!(env)
-obs = DrillInterface.observe(env)
-action = rand(DrillInterface.action_space(env))
-reward = DrillInterface.act!(env, action)
+reset!(env)
+obs = observe(env)
+action = rand(action_space(env))
+reward = act!(env, action)
 ```
 
 ## Available Environments
 
-| Environment | Action Dim | Observation Dim | Description |
-|-------------|-----------|-----------------|-------------|
-| HalfCheetah | 6 | 17 | 2D robot learning to run forward |
-| Hopper | 3 | 11 | One-legged robot learning to hop |
-| Walker2d | 6 | 17 | Two-legged robot learning to walk |
-| Ant | 8 | 27 | Four-legged robot learning to walk |
-| Humanoid | 17 | ~376 | Bipedal humanoid learning to walk |
-| Swimmer | 2 | 8 | Three-link robot learning to swim |
+| Environment            | Action Dim | Observation Dim | Description                        |
+| ---------------------- | ---------- | --------------- | ---------------------------------- |
+| HalfCheetah            | 6          | 17              | 2D robot learning to run forward   |
+| Hopper                 | 3          | 11              | One-legged robot learning to hop   |
+| Walker2d               | 6          | 17              | Two-legged robot learning to walk  |
+| Ant                    | 8          | ~105            | Four-legged robot learning to walk |
+| Humanoid               | 17         | ~376            | Bipedal humanoid learning to walk  |
+| Swimmer                | 2          | 8               | Three-link robot learning to swim  |
+| InvertedPendulum       | 1          | 4               | Cart-pole balance                  |
+| InvertedDoublePendulum | 1          | 9               | Double cart-pole balance           |
+| Reacher                | 2          | 10              | Two-jointed arm reaching           |
+| Pusher                 | 7          | 23              | Arm pushing object to goal         |
+| HumanoidStandup        | 17         | ~346            | Bipedal robot standing up          |
 
 ## Examples
 
@@ -96,7 +102,7 @@ render(env)
 
 ## Architecture
 
-The package defines a minimal internal interface (`AbstractMuJoCoEnv`) with core functions (`reset_env!`, `step_env!`, etc.). Drill.jl support is provided via wrapper types (e.g. `DrillHalfCheetahEnv`) that implement DrillInterface.
+The package defines a minimal internal interface (`_AbstractMuJoCoEnv`) with core functions (`reset_env!`, `step_env!`, etc.). All environment types subtype `DrillInterface.AbstractEnv` and implement DrillInterface directly.
 
 ## Contributing
 
