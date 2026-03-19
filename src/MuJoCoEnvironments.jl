@@ -1,8 +1,9 @@
 module MuJoCoEnvironments
 
+using DrillInterface
+using LinearAlgebra: norm
 using MuJoCo
 using Random
-using DrillInterface
 
 # Core interface
 include("core_interface.jl")

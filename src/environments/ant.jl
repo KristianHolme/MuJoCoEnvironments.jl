@@ -75,7 +75,7 @@ mutable struct AntEnv{T, R} <: _AbstractMuJoCoEnv{T}
 
         # Convert main_body name to ID if needed
         main_body_id = if main_body isa String
-            MuJoCo.bodyid(model, main_body)
+            MuJoCo.body(model, main_body).id
         else
             main_body
         end
@@ -115,7 +115,7 @@ function step_env!(env::AntEnv, action::AbstractVector)
     action = clip_action(action, low, high)
 
     # Get body position before step
-    body_before = MuJoCo.body(env.model, env.data, env.main_body)
+    body_before = MuJoCo.body(env.data, env.main_body)
     xy_pos_before = [body_before.xpos[1], body_before.xpos[2]]
 
     # Apply action and step simulation
@@ -123,7 +123,7 @@ function step_env!(env::AntEnv, action::AbstractVector)
     forward_step!(env, env.frame_skip)
 
     # Get body position after step
-    body_after = MuJoCo.body(env.model, env.data, env.main_body)
+    body_after = MuJoCo.body(env.data, env.main_body)
     xy_pos_after = [body_after.xpos[1], body_after.xpos[2]]
 
     # Calculate dt

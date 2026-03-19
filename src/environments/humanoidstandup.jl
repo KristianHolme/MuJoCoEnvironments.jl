@@ -75,7 +75,7 @@ mutable struct HumanoidStandupEnv{T, R} <: _AbstractMuJoCoEnv{T}
             model, data = load_model_from_path(path)
         end
 
-        init_qpos = copy(data.qpos)
+        init_qpos = vec(copy(something(data.qpos)))
 
         return new{T, R}(
             model, data, 0, max_episode_steps, frame_skip, rng,
@@ -99,9 +99,11 @@ function reset_env!(env::HumanoidStandupEnv)
     noise_high = env.reset_noise_scale
 
     qpos = env.init_qpos .+ (noise_low .+ (noise_high - noise_low) .* rand(env.rng, length(env.init_qpos)))
-    qvel = env.data.qvel .+ (noise_low .+ (noise_high - noise_low) .* rand(env.rng, length(env.data.qvel)))
+    qvel = something(env.data.qvel) .+ (noise_low .+ (noise_high - noise_low) .* rand(env.rng, length(something(env.data.qvel))))
 
-    MuJoCo.set_state!(env.model, env.data, qpos, qvel)
+    state = vcat(vec(qpos), vec(qvel), zeros(env.model.na))
+    MuJoCo.set_physics_state!(env.model, env.data, state)
+    MuJoCo.forward!(env.model, env.data)
     env.init_qpos = copy(qpos)
 
     return get_observation(env)

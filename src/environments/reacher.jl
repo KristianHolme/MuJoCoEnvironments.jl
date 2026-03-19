@@ -93,7 +93,9 @@ function reset_env!(env::ReacherEnv)
     qvel = env.data.qvel .+ (-0.005 .+ 0.01 .* rand(env.rng, length(env.data.qvel)))
     qvel[(end - 1):end] .= 0  # Target has no velocity
 
-    MuJoCo.set_state!(env.model, env.data, qpos, qvel)
+    state = vcat(vec(qpos), vec(qvel), zeros(env.model.na))
+    MuJoCo.set_physics_state!(env.model, env.data, state)
+    MuJoCo.forward!(env.model, env.data)
 
     return get_observation(env)
 end
@@ -108,8 +110,8 @@ function step_env!(env::ReacherEnv, action::AbstractVector)
     observation = get_observation(env)
 
     # Calculate reward
-    fingertip_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "fingertip")).xpos
-    target_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "target")).xpos
+    fingertip_pos = MuJoCo.body(env.data, "fingertip").xpos
+    target_pos = MuJoCo.body(env.data, "target").xpos
     vec = fingertip_pos - target_pos
 
     reward_dist = -norm(vec) * env.reward_dist_weight
@@ -132,8 +134,8 @@ end
 function get_observation(env::ReacherEnv)
     theta = env.data.qpos[1:2]
 
-    fingertip_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "fingertip")).xpos
-    target_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "target")).xpos
+    fingertip_pos = MuJoCo.body(env.data, "fingertip").xpos
+    target_pos = MuJoCo.body(env.data, "target").xpos
     diff = fingertip_pos[1:2] - target_pos[1:2]
 
     return vec(

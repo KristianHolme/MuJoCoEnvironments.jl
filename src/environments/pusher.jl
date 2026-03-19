@@ -98,10 +98,12 @@ function reset_env!(env::PusherEnv)
     qpos[(end - 1):end] = env.goal_pos
 
     # Reset velocities with noise
-    qvel = env.data.qvel .+ (-0.005 + 0.01 * rand(env.rng, length(env.data.qvel)))
+    qvel = something(env.data.qvel) .+ (-0.005 .+ 0.01 .* rand(env.rng, length(something(env.data.qvel))))
     qvel[(end - 4):end] .= 0  # Object and goal have no velocity
 
-    MuJoCo.set_state!(env.model, env.data, qpos, qvel)
+    state = vcat(vec(qpos), vec(qvel), zeros(env.model.na))
+    MuJoCo.set_physics_state!(env.model, env.data, state)
+    MuJoCo.forward!(env.model, env.data)
 
     return get_observation(env)
 end
@@ -116,9 +118,9 @@ function step_env!(env::PusherEnv, action::AbstractVector)
     observation = get_observation(env)
 
     # Calculate reward
-    fingertip_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "tips_arm")).xpos
-    object_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "object")).xpos
-    goal_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "goal")).xpos
+    fingertip_pos = MuJoCo.body(env.data, "tips_arm").xpos
+    object_pos = MuJoCo.body(env.data, "object").xpos
+    goal_pos = MuJoCo.body(env.data, "goal").xpos
 
     vec_1 = object_pos - fingertip_pos
     vec_2 = object_pos - goal_pos
@@ -143,9 +145,9 @@ function step_env!(env::PusherEnv, action::AbstractVector)
 end
 
 function get_observation(env::PusherEnv)
-    fingertip_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "tips_arm")).xpos
-    object_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "object")).xpos
-    goal_pos = MuJoCo.body(env.model, env.data, MuJoCo.bodyid(env.model, "goal")).xpos
+    fingertip_pos = MuJoCo.body(env.data, "tips_arm").xpos
+    object_pos = MuJoCo.body(env.data, "object").xpos
+    goal_pos = MuJoCo.body(env.data, "goal").xpos
 
     return vec(
         vcat(

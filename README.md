@@ -4,13 +4,12 @@
 [![Coverage](https://codecov.io/gh/KristianHolme/MuJoCoEnvironments.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/KristianHolme/MuJoCoEnvironments.jl)
 [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-MuJoCoEnvironments.jl provides a collection of reinforcement learning environments based on [MuJoCo.jl](https://github.com/JamieMair/MuJoCo.jl), with a core interface and [Drill.jl](https://github.com/KristianHolme/Drill.jl) (DrillInterface) support.
+MuJoCoEnvironments.jl provides a collection of reinforcement learning environments based on [MuJoCo.jl](https://github.com/JamieMair/MuJoCo.jl), for use with [Drill.jl](https://github.com/KristianHolme/Drill.jl).
 
 ## Features
 
 - **Multiple Environments**: HalfCheetah, Hopper, Walker2d, Ant, Humanoid, Swimmer, InvertedPendulum, InvertedDoublePendulum, Reacher, Pusher, HumanoidStandup
-- **Core interface**: `reset_env!`, `step_env!`, `get_observation`, action/observation bounds
-- **Drill.jl**: Environments work with DrillInterface for use in Drill pipelines
+- **Drill.jl**: Environments use the [DrillInterface.jl](https://github.com/KristianHolme/Drill.jl/tree/main/DrillInterface) RL interface, for usage with [Drill.jl](https://github.com/KristianHolme/Drill.jl)
 - **MuJoCo.jl Integration**: Uses native Julia bindings for MuJoCo physics simulation
 - **Built-in Models**: Includes MuJoCo XML model files from Gymnasium
 - **Visualization Support**: Native MuJoCo rendering through MuJoCo.jl
@@ -22,37 +21,13 @@ using Pkg
 Pkg.add("MuJoCoEnvironments")
 ```
 
-For development:
-
-```julia
-Pkg.develop(path="path/to/MuJoCoEnvironments")
-```
-
 ## Quick Start
 
-### Basic Usage (core interface)
-
 ```julia
 using MuJoCoEnvironments
+using Drill
 
-# Create an environment
-env = HalfCheetahEnv(max_episode_steps=1000)
-
-# Reset to initial state
-obs = reset_env!(env)
-
-# Take a step
-action = randn(env.model.nu)  # Random action
-obs, reward, terminated, truncated, info = step_env!(env, action)
-```
-
-### Using with Drill.jl
-
-```julia
-using MuJoCoEnvironments
-using Drill # Drill reexports the DrillInterface interfaces
-
-# Create environment (implements DrillInterface directly)
+# Create environment
 env = HalfCheetahEnv(max_episode_steps=1000)
 
 # Use Drill interface
