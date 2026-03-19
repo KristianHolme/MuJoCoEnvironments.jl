@@ -75,10 +75,6 @@ MuJoCo.init_visualiser()
 render(env)
 ```
 
-## Architecture
-
-The package defines a minimal internal interface (`_AbstractMuJoCoEnv`) with core functions (`reset_env!`, `step_env!`, etc.). All environment types subtype `DrillInterface.AbstractEnv` and implement DrillInterface directly.
-
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
