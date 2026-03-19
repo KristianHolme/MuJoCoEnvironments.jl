@@ -40,28 +40,7 @@ Pkg.add("Drill")
 julia examples/dril_interface_example.jl
 ```
 
-### 3. `commonrl_interface_example.jl`
-Using MuJoCo environments with CommonRLInterface.jl.
-
-**What it covers:**
-- Creating environments with CommonRLInterface
-- Using CommonRLInterface standard methods
-- State manipulation (get/set state)
-- Environment cloning
-- Working with action/observation spaces
-
-**Prerequisites:**
-```julia
-using Pkg
-Pkg.add("CommonRLInterface")
-```
-
-**Run with:**
-```bash
-julia examples/commonrl_interface_example.jl
-```
-
-### 4. `all_environments_showcase.jl`
+### 3. `all_environments_showcase.jl`
 Comprehensive showcase of all available environments.
 
 **What it covers:**
@@ -124,7 +103,7 @@ If you encounter issues:
 
 1. **Model not found warnings**: This is expected if MuJoCo model files aren't in the standard location. The environment will use a fallback sample model.
 
-2. **Extension not loading**: Make sure you have the interface package installed (Drill or CommonRLInterface) before running those examples.
+2. **Drill not loading**: Make sure Drill is installed before running the Drill interface example.
 
 3. **Rendering issues**: Ensure you have the MuJoCo visualizer properly installed and initialized.
 
@@ -133,5 +112,4 @@ If you encounter issues:
 - Main package documentation: See the main README.md
 - MuJoCo.jl documentation: https://github.com/JamieMair/MuJoCo.jl
 - Drill.jl: https://github.com/KristianHolme/Drill.jl
-- CommonRLInterface.jl: https://github.com/JuliaReinforcementLearning/CommonRLInterface.jl
 

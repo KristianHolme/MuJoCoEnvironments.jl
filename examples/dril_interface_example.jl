@@ -2,7 +2,7 @@
 # This example shows how to use MuJoCo environments with the Drill.jl interface
 
 using MuJoCoEnvironments
-using Drill  # This will load the Drill extension automatically
+using Drill
 using Random
 
 println("="^60)

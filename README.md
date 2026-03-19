@@ -4,12 +4,13 @@
 [![Coverage](https://codecov.io/gh/KristianHolme/MuJoCoEnvironments.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/KristianHolme/MuJoCoEnvironments.jl)
 [![Aqua](https://raw.githubusercontent.com/JuliaTesting/Aqua.jl/master/badge.svg)](https://github.com/JuliaTesting/Aqua.jl)
 
-MuJoCoEnvironments.jl provides a collection of reinforcement learning environments based on [MuJoCo.jl](https://github.com/JamieMair/MuJoCo.jl), compatible with multiple RL interfaces including [Drill.jl](https://github.com/KristianHolme/Drill.jl) and [CommonRLInterface.jl](https://github.com/JuliaReinforcementLearning/CommonRLInterface.jl).
+MuJoCoEnvironments.jl provides a collection of reinforcement learning environments based on [MuJoCo.jl](https://github.com/JamieMair/MuJoCo.jl), with a core interface and [Drill.jl](https://github.com/KristianHolme/Drill.jl) (DrillInterface) support.
 
 ## Features
 
 - **Multiple Environments**: HalfCheetah, Hopper, Walker2d, Ant, Humanoid, Swimmer
-- **Flexible Interface**: Core internal interface with extensions for Drill.jl and CommonRLInterface.jl
+- **Core interface**: `reset_env!`, `step_env!`, `get_observation`, action/observation bounds
+- **Drill.jl**: Environments work with DrillInterface for use in Drill pipelines
 - **MuJoCo.jl Integration**: Uses native Julia bindings for MuJoCo physics simulation
 - **Built-in Models**: Includes MuJoCo XML model files from Gymnasium
 - **Visualization Support**: Native MuJoCo rendering through MuJoCo.jl
@@ -28,7 +29,7 @@ Pkg.develop(path="path/to/MuJoCoEnvironments")
 
 ## Quick Start
 
-### Basic Usage
+### Basic Usage (core interface)
 
 ```julia
 using MuJoCoEnvironments
@@ -48,7 +49,7 @@ obs, reward, terminated, truncated, info = step_env!(env, action)
 
 ```julia
 using MuJoCoEnvironments
-using Drill  # Automatically loads the extension
+using Drill
 
 # Create environment with Drill interface
 env = DrillHalfCheetahEnv(max_episode_steps=1000)
@@ -58,22 +59,6 @@ DrillInterface.reset!(env)
 obs = DrillInterface.observe(env)
 action = rand(DrillInterface.action_space(env))
 reward = DrillInterface.act!(env, action)
-```
-
-### Using with CommonRLInterface.jl
-
-```julia
-using MuJoCoEnvironments
-using CommonRLInterface
-
-# Create core environment and wrap it
-core_env = HopperEnv(max_episode_steps=1000)
-env = CommonRLMuJoCoEnv(core_env)
-
-# Use CommonRLInterface
-CommonRLInterface.reset!(env)
-obs = CommonRLInterface.observe(env)
-CommonRLInterface.act!(env, action)
 ```
 
 ## Available Environments
@@ -93,7 +78,6 @@ See the [`examples/`](examples/) directory for detailed usage examples:
 
 - `basic_usage.jl` - Core interface usage
 - `dril_interface_example.jl` - Using with Drill.jl
-- `commonrl_interface_example.jl` - Using with CommonRLInterface.jl
 - `all_environments_showcase.jl` - Overview of all environments
 
 ## Rendering
@@ -112,12 +96,7 @@ render(env)
 
 ## Architecture
 
-The package uses a **minimal internal interface** (`AbstractMuJoCoEnv`) that is separate from specific RL frameworks. **Extensions** provide compatibility with different RL interfaces:
-
-- `MuJoCoEnvironmentsDrillExt` - Drill.jl interface
-- `MuJoCoEnvironmentsCommonRLInterfaceExt` - CommonRLInterface.jl interface
-
-This design prevents method conflicts when multiple interface packages are loaded, as each extension defines its own wrapper type (`DrillMuJoCoEnv`, `CommonRLMuJoCoEnv`).
+The package defines a minimal internal interface (`AbstractMuJoCoEnv`) with core functions (`reset_env!`, `step_env!`, etc.). Drill.jl support is provided via wrapper types (e.g. `DrillHalfCheetahEnv`) that implement DrillInterface.
 
 ## Contributing
 
