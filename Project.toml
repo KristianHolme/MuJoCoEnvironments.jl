@@ -1,6 +1,6 @@
 name = "MuJoCoEnvironments"
 uuid = "21ab680e-8976-4604-9445-b09bf8035a21"
-version = "0.0.1-DEV"
+version = "0.1.0"
 authors = ["Kristian Holme <holme.kristian@gmail.com> and contributors"]
 
 [deps]
@@ -10,7 +10,7 @@ MuJoCo = "1c101251-5e0f-4746-b44c-0728d433b68a"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [sources]
-DrillInterface = {rev = "main", subdir = "DrillInterface", url = "https://github.com/KristianHolme/Drill.jl"}
+DrillInterface = { rev = "main", subdir = "DrillInterface", url = "https://github.com/KristianHolme/Drill.jl" }
 
 [compat]
 Aqua = "0.8"
