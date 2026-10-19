@@ -81,17 +81,20 @@ end
     @test is_truncated(env)
 end
 
-@testitem "Random.seed!" begin
-    using Random
+@testitem "reset! with seed" begin
+    using DrillInterface
 
     env = HopperEnv(max_episode_steps = 100)
-    Random.seed!(env, 123)
-    obs1 = reset_env!(env)
+    DrillInterface.reset!(env; seed = 123)
+    obs1 = copy(DrillInterface.observe(env))
 
-    Random.seed!(env, 123)
-    obs2 = reset_env!(env)
+    DrillInterface.reset!(env; seed = 123)
+    obs2 = DrillInterface.observe(env)
 
     @test obs1 ≈ obs2
+
+    DrillInterface.reset!(env; seed = 456)
+    @test !(DrillInterface.observe(env) ≈ obs1)
 end
 
 @testitem "All environments - interface smoke" begin

@@ -192,16 +192,14 @@ function is_terminated(env::HalfCheetahEnv)
 end
 
 # Drill interface implementation
-function DrillInterface.reset!(env::HalfCheetahEnv)
+function DrillInterface.reset!(env::HalfCheetahEnv; seed = nothing)
+    seed isa Integer && Random.seed!(env.rng, seed)
     reset_env!(env)
     return nothing
 end
 
 function DrillInterface.act!(env::HalfCheetahEnv, action::AbstractVector)
-    obs, reward, terminated, truncated, info = step_env!(env, action)
-    if terminated || truncated
-        info["terminal_observation"] = obs
-    end
+    _, reward, _, _, _ = step_env!(env, action)
     return convert(eltype(env.forward_reward_weight), reward)
 end
 

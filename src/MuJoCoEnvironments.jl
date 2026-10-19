@@ -18,7 +18,6 @@ export clip_action, get_ctrl, get_qpos, get_qvel
 # Core interface functions
 export get_action_bounds, get_observation, get_observation_bounds, is_terminated, reset_env!,
     step_env!
-# Random.seed! is exported via Random module, but available for all environments
 
 # Rendering
 include("rendering.jl")

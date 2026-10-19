@@ -94,6 +94,7 @@ end
 
 function reset_env!(env::HumanoidStandupEnv)
     env.timestep = 0
+    MuJoCo.reset!(env.model, env.data)  # start from the initial state, not the previous episode
 
     noise_low = -env.reset_noise_scale
     noise_high = env.reset_noise_scale
@@ -104,7 +105,6 @@ function reset_env!(env::HumanoidStandupEnv)
     state = vcat(vec(qpos), vec(qvel), zeros(env.model.na))
     MuJoCo.set_physics_state!(env.model, env.data, state)
     MuJoCo.forward!(env.model, env.data)
-    env.init_qpos = copy(qpos)
 
     return get_observation(env)
 end
@@ -182,16 +182,14 @@ function get_action_bounds(env::HumanoidStandupEnv)
 end
 
 # Drill interface implementation
-function DrillInterface.reset!(env::HumanoidStandupEnv)
+function DrillInterface.reset!(env::HumanoidStandupEnv; seed = nothing)
+    seed isa Integer && Random.seed!(env.rng, seed)
     reset_env!(env)
     return nothing
 end
 
 function DrillInterface.act!(env::HumanoidStandupEnv, action::AbstractVector)
-    obs, reward, terminated, truncated, info = step_env!(env, action)
-    if terminated || truncated
-        info["terminal_observation"] = obs
-    end
+    _, reward, _, _, _ = step_env!(env, action)
     return convert(eltype(env.ctrl_cost_weight), reward)
 end
 

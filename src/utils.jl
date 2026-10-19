@@ -187,20 +187,3 @@ Clip action to be within specified bounds.
 function clip_action(action::AbstractVector, low::AbstractVector, high::AbstractVector)
     return clamp.(action, low, high)
 end
-
-"""
-    Random.seed!(env::_AbstractMuJoCoEnv, seed::Integer)
-
-Seed the environment's random number generator.
-
-# Arguments
-- `env::AbstractMuJoCoEnv`: The environment
-- `seed::Integer`: Seed value for the random number generator
-
-# Returns
-- `Nothing`
-"""
-function Random.seed!(env::_AbstractMuJoCoEnv{T}, seed::Integer) where {T}
-    Random.seed!(env.rng, seed)
-    return nothing
-end

@@ -63,12 +63,10 @@ println("\n" * "="^60)
 println("Testing reproducibility with seeding...")
 println("="^60)
 
-Random.seed!(env, 123)
-reset!(env)
-obs1 = observe(env)
+reset!(env; seed = 123)
+obs1 = copy(observe(env))
 
-Random.seed!(env, 123)
-reset!(env)
+reset!(env; seed = 123)
 obs2 = observe(env)
 
 println("Observations match after same seed: ", obs1 ≈ obs2)

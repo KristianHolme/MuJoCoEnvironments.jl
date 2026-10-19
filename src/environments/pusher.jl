@@ -76,6 +76,7 @@ end
 
 function reset_env!(env::PusherEnv)
     env.timestep = 0
+    MuJoCo.reset!(env.model, env.data)  # start from the initial state, not the previous episode
 
     qpos = copy(env.data.qpos)
 
@@ -171,16 +172,14 @@ function get_observation_bounds(env::PusherEnv)
 end
 
 # Drill interface implementation
-function DrillInterface.reset!(env::PusherEnv)
+function DrillInterface.reset!(env::PusherEnv; seed = nothing)
+    seed isa Integer && Random.seed!(env.rng, seed)
     reset_env!(env)
     return nothing
 end
 
 function DrillInterface.act!(env::PusherEnv, action::AbstractVector)
-    obs, reward, terminated, truncated, info = step_env!(env, action)
-    if terminated || truncated
-        info["terminal_observation"] = obs
-    end
+    _, reward, _, _, _ = step_env!(env, action)
     return convert(eltype(env.reward_near_weight), reward)
 end
 
