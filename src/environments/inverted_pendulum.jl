@@ -104,16 +104,14 @@ function get_observation_bounds(env::InvertedPendulumEnv)
 end
 
 # Drill interface implementation
-function DrillInterface.reset!(env::InvertedPendulumEnv)
+function DrillInterface.reset!(env::InvertedPendulumEnv; seed = nothing)
+    seed isa Integer && Random.seed!(env.rng, seed)
     reset_env!(env)
     return nothing
 end
 
 function DrillInterface.act!(env::InvertedPendulumEnv, action::AbstractVector)
-    obs, reward, terminated, truncated, info = step_env!(env, action)
-    if terminated || truncated
-        info["terminal_observation"] = obs
-    end
+    _, reward, _, _, _ = step_env!(env, action)
     return convert(eltype(env.reset_noise_scale), reward)
 end
 

@@ -72,6 +72,7 @@ end
 
 function reset_env!(env::ReacherEnv)
     env.timestep = 0
+    MuJoCo.reset!(env.model, env.data)  # start from the initial state, not the previous episode
 
     # Reset arm position with noise
     noise_low = -0.1
@@ -160,16 +161,14 @@ function get_observation_bounds(env::ReacherEnv)
 end
 
 # Drill interface implementation
-function DrillInterface.reset!(env::ReacherEnv)
+function DrillInterface.reset!(env::ReacherEnv; seed = nothing)
+    seed isa Integer && Random.seed!(env.rng, seed)
     reset_env!(env)
     return nothing
 end
 
 function DrillInterface.act!(env::ReacherEnv, action::AbstractVector)
-    obs, reward, terminated, truncated, info = step_env!(env, action)
-    if terminated || truncated
-        info["terminal_observation"] = obs
-    end
+    _, reward, _, _, _ = step_env!(env, action)
     return convert(eltype(env.reward_dist_weight), reward)
 end
 

@@ -40,3 +40,19 @@
         @test info isa Dict
     end
 end
+
+@testitem "DrillInterface.check_env - all environments" begin
+    using DrillInterface
+
+    for E in (
+            HalfCheetahEnv, HopperEnv, Walker2dEnv, AntEnv, HumanoidEnv, SwimmerEnv,
+            ReacherEnv, PusherEnv, InvertedPendulumEnv, InvertedDoublePendulumEnv,
+            HumanoidStandupEnv,
+        )
+        env = E(max_episode_steps = 20)
+        @test_nowarn DrillInterface.check_env(env; warn = true, verbose = false)
+        @test DrillInterface.observation_space(env) isa DrillInterface.Box{Float64, 1}
+        dest = similar(DrillInterface.observe(env))
+        @test DrillInterface.observe!(dest, env) === dest
+    end
+end
